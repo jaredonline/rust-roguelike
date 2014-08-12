@@ -5,11 +5,6 @@ version = "0.0.1"
 authors = ["jmcfarland"]
 build = "sh .build.sh"
 
-[dependencies.color]
-
-git = "https://github.com/bjz/color-rs.git"
-
 [dependencies.tcod]
 
 git = "https://github.com/tomassedovic/tcod-rs.git"
-

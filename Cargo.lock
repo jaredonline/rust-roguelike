@@ -2,14 +2,8 @@
 name = "dwemthys"
 version = "0.0.1"
 dependencies = [
- "color 0.0.1 (git+https://github.com/bjz/color-rs.git#bf739419e2d31050615c1ba1a395b474269a4b98)",
  "tcod 0.1.0 (git+https://github.com/tomassedovic/tcod-rs.git#2f72b1d84479831fd618b0db0afe564e5257d615)",
 ]
-
-[[package]]
-name = "color"
-version = "0.0.1"
-source = "git+https://github.com/bjz/color-rs.git#bf739419e2d31050615c1ba1a395b474269a4b98"
 
 [[package]]
 name = "tcod"
