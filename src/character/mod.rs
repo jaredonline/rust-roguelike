@@ -3,7 +3,7 @@ use self::tcod::{key_code, Special};
 
 use util::{Point, DoesContain, DoesNotContain};
 use game::Game;
-use rendering::TcodRenderingComponent;
+use rendering::RenderingComponent;
 
 pub struct Character {
     pub position:     Point,
@@ -15,7 +15,7 @@ impl Character {
         Character { position: Point { x: x, y: y }, display_char: dc }
     }
 
-    pub fn update(&mut self, keypress: tcod::KeyState, game: Game) {
+    pub fn update(&mut self, keypress: tcod::KeyState, game: &Game) {
         let mut offset = Point { x: 0, y: 0 };
         match keypress.key {
             Special(key_code::Up) => {
@@ -39,7 +39,7 @@ impl Character {
         }
     }
 
-    pub fn render(&self, rendering_component: &mut TcodRenderingComponent) {
+    pub fn render(&self, rendering_component: &mut RenderingComponent) {
         rendering_component.render_object(self.position, self.display_char);
     }
 }
