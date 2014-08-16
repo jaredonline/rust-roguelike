@@ -1,9 +1,9 @@
 extern crate tcod;
-use self::tcod::{Console, background_flag, key_code, Special};
+use self::tcod::{key_code, Special};
 
-use traits::Updates;
 use util::{Point, DoesContain, DoesNotContain};
 use game::Game;
+use rendering::TcodRenderingComponent;
 
 pub struct Character {
     pub position:     Point,
@@ -11,13 +11,11 @@ pub struct Character {
 }
 
 impl Character {
-    pub fn new(x: int, y: int, dc: char) -> Character {
+    pub fn new(x: i32, y: i32, dc: char) -> Character {
         Character { position: Point { x: x, y: y }, display_char: dc }
     }
-}
 
-impl Updates for Character {
-    fn update(&mut self, keypress: tcod::KeyState, game: Game) {
+    pub fn update(&mut self, keypress: tcod::KeyState, game: Game) {
         let mut offset = Point { x: 0, y: 0 };
         match keypress.key {
             Special(key_code::Up) => {
@@ -41,7 +39,7 @@ impl Updates for Character {
         }
     }
 
-    fn render(&self, console: &mut Console) {
-        console.put_char(self.position.x, self.position.y, self.display_char, background_flag::Set);
+    pub fn render(&self, rendering_component: &mut TcodRenderingComponent) {
+        rendering_component.render_object(self.position, self.display_char);
     }
 }

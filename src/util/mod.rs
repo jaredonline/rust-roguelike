@@ -1,14 +1,14 @@
 pub struct Point {
-    pub x: int,
-    pub y: int
+    pub x: i32,
+    pub y: i32
 }
 
 impl Point {
-    pub fn offset_x(&self, offset: int) -> Point {
+    pub fn offset_x(&self, offset: i32) -> Point {
         Point { x: self.x + offset, y: self.y }
     }
 
-    pub fn offset_y(&self, offset: int) -> Point {
+    pub fn offset_y(&self, offset: i32) -> Point {
         Point { x: self.x, y: self.y + offset }
     }
 
