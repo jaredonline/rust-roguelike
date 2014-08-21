@@ -9,7 +9,7 @@ use dwemthys::npc::NPC;
 
 use tcod::{Console, key_code, Special};
 
-fn render(con: &mut Console, objs: &Vec<&mut Updates>) {
+fn render(con: &mut Console, objs: &Vec<Box<Updates>>) {
     con.clear();
     for i in objs.iter() {
         i.render(con);
@@ -17,8 +17,8 @@ fn render(con: &mut Console, objs: &Vec<&mut Updates>) {
     con.flush();
 }
 
-fn update(objs: &Vec<&mut Updates>, keypress: tcod::KeyState, game: Game) {
-    for &mut i in objs.iter() {
+fn update(objs: &mut Vec<Box<Updates>>, keypress: tcod::KeyState, game: Game) {
+    for i in objs.mut_iter() {
         i.update(keypress, game);
     }
 }
@@ -26,11 +26,10 @@ fn update(objs: &Vec<&mut Updates>, keypress: tcod::KeyState, game: Game) {
 fn main() {
     let mut game = Game { exit: false, window_bounds: Bound { min: Point { x: 0, y: 0 }, max: Point { x: 79, y: 49 } } };
     let mut con = Console::init_root(game.window_bounds.max.x + 1, game.window_bounds.max.y + 1, "libtcod Rust tutorial", false);
-    let mut c = Character::new(40, 25, '@');
-    let mut d = NPC::new(10, 10, 'd');
-    let objs: Vec<&mut Updates> = vec![
-        &mut d as &mut Updates,
-        &mut c as &mut Updates
+    let c = box Character::new(40, 25, '@') as Box<Updates>;
+    let d = box NPC::new(10, 10, 'd') as Box<Updates>;
+    let mut objs: Vec<Box<Updates>> = vec![
+        c, d
     ];
 
     render(&mut con, &objs);
@@ -43,7 +42,7 @@ fn main() {
             Special(key_code::Escape) => game.exit = true,
             _                         => {}
         }
-        update(&objs, keypress, game);
+        update(&mut objs, keypress, game);
 
         // render
         render(&mut con, &objs);
