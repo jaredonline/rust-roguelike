@@ -1,6 +1,18 @@
 extern crate tcod;
 
-use util::{Point, DoesContain, DoesNotContain};
+use util::{
+    Point,
+    DoesContain,
+    DoesNotContain,
+    LeftOfPoint,
+    RightOfPoint,
+    OnPointX,
+    AbovePoint,
+    BelowPoint,
+    OnPointY,
+    PointsEqual,
+    PointsNotEqual
+};
 use game::Game;
 
 use std;
@@ -79,8 +91,28 @@ impl MovementComponent for AggroMovementComponent {
     }
 
     fn handle_input(&self, point: Point) -> Point {
-        point
+        let char_point = Game::get_char_point();
+        let mut offset = Point { x: 0, y: 0 };
+        match point.compare_x(char_point) {
+            RightOfPoint => offset = offset.offset_x(-1),
+            LeftOfPoint  => offset = offset.offset_x(1),
+            OnPointX     => {}
+        }
+        
+        match point.compare_y(char_point) {
+            BelowPoint => offset = offset.offset_y(-1),
+            AbovePoint => offset = offset.offset_y(1),
+            OnPointY   => {}
+        }
+
+        match point.offset(offset).compare(char_point) {
+            PointsEqual    => { return point; },
+            PointsNotEqual => {
+                match Game::bounds_contain(point.offset(offset)) {
+                    DoesContain    => { return point.offset(offset); }
+                    DoesNotContain => { return point; }
+                }
+            }
+        }
     }
 }
-
-impl AggroMovementComponent {}

@@ -14,6 +14,7 @@ static BOUNDS : Bound = Bound {
     min: Point { x: 0, y: 0 },
     max: Point { x: WIN_WIDTH, y: WIN_HEIGHT }
 };
+static mut CHAR_POSITION : Point = Point { x: 40, y: 25 };
 
 pub struct Game {
     pub exit:                bool,
@@ -34,9 +35,18 @@ impl Game {
         BOUNDS.contains(point)
     }
 
+    pub fn get_char_point() -> Point {
+        unsafe { CHAR_POSITION }
+    }
+
+    pub fn set_char_point(p: Point) {
+        unsafe { CHAR_POSITION = p; }
+    }
+
     pub fn new() -> Game {
         let ic : Box<TcodUserMovementComponent> = box MovementComponent::new();
-        let c = Actor::new(40, 25, '@', ic);
+        let cp = Game::get_char_point();
+        let c = Actor::new(cp.x, cp.y, '@', ic);
         let rc : Box<TcodRenderingComponent> = box RenderingComponent::new(BOUNDS);
         Game { 
             exit:                false,
@@ -51,7 +61,7 @@ impl Game {
         keypress
     }
 
-    pub fn render(&mut self, objects: &Vec<&mut Actor>) {
+    pub fn render(&mut self, objects: &Vec<Box<Actor>>) {
         self.rendering_component.before_render_new_frame();
         for i in objects.iter() {
             i.render(self.rendering_component);
@@ -60,9 +70,10 @@ impl Game {
         self.rendering_component.after_render_new_frame();
     }
 
-    pub fn update(&mut self, objects: &Vec<&mut Actor>) {
+    pub fn update(&mut self, objects: &mut Vec<Box<Actor>>) {
         self.character.update();
-        for &mut object in objects.iter() {
+        Game::set_char_point(self.character.position);
+        for object in objects.mut_iter() {
             object.update();
         }
     }

@@ -1,3 +1,20 @@
+pub enum XPointRelation {
+    LeftOfPoint,
+    RightOfPoint,
+    OnPointX
+}
+
+pub enum YPointRelation {
+    AbovePoint,
+    BelowPoint,
+    OnPointY
+}
+
+pub enum PointEquality {
+    PointsEqual,
+    PointsNotEqual
+}
+
 pub struct Point {
     pub x: i32,
     pub y: i32
@@ -14,6 +31,34 @@ impl Point {
 
     pub fn offset(&self, offset: Point) -> Point {
         Point { x: self.x + offset.x, y: self.y + offset.y }
+    }
+
+    pub fn compare_x(&self, point: Point) -> XPointRelation {
+        if self.x > point.x {
+            RightOfPoint
+        } else if self.x < point.x {
+            LeftOfPoint
+        } else {
+            OnPointX
+        }
+    }
+
+    pub fn compare_y(&self, point: Point) -> YPointRelation {
+        if self.y > point.y {
+            BelowPoint
+        } else if self.y < point.y {
+            AbovePoint
+        } else {
+            OnPointY
+        }
+    }
+
+    pub fn compare(&self, point: Point) -> PointEquality {
+        if self.x == point.x && self.y == point.y {
+            PointsEqual
+        } else {
+            PointsNotEqual
+        }
     }
 }
 
