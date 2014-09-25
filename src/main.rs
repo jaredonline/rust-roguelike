@@ -6,7 +6,7 @@ use dwemthys::actor::Actor;
 use dwemthys::rendering::RenderingComponent;
 use dwemthys::movement::MovementComponent;
 
-use tcod::{Console, key_code, Special, Printable};
+use tcod::{Console, key_code, Special};
 
 fn main() {
     let mut game = Game::new();

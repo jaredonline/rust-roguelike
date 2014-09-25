@@ -1,3 +1,5 @@
+#![feature(macro_rules)]
+
 pub mod util;
 pub mod game;
 pub mod traits;

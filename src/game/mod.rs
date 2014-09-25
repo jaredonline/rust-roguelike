@@ -12,21 +12,22 @@ use rendering::{
 use actor::Actor;
 
 use self::tcod::KeyState;
+use self::tcod::Printable;
 
 static mut LAST_KEYPRESS : Option<KeyState> = None;
 static mut CHAR_LOCATION : Point = Point { x: 40, y: 25 };
 
-pub struct Game {
+pub struct Game<'a> {
     pub exit:                bool,
     pub window_bounds:       Bound,
-    pub rendering_component: Box<RenderingComponent>,
-    pub stats_window:        Box<WindowComponent>,
-    pub map_window:          Box<WindowComponent>,
-    pub input_window:        Box<WindowComponent>,
-    pub messages_window:     Box<WindowComponent>
+    pub rendering_component: Box<RenderingComponent + 'a>,
+    pub stats_window:        Box<WindowComponent + 'a>,
+    pub map_window:          Box<WindowComponent + 'a>,
+    pub input_window:        Box<WindowComponent + 'a>,
+    pub messages_window:     Box<WindowComponent + 'a>
 }
 
-impl Game {
+impl<'a> Game<'a> {
     pub fn get_last_keypress() -> Option<KeyState> {
         unsafe { LAST_KEYPRESS }
     }
@@ -43,7 +44,7 @@ impl Game {
         unsafe { CHAR_LOCATION = point; }
     }
 
-    pub fn new() -> Game {
+    pub fn new() -> Game<'a> {
         let total_bounds   = Bound::new(0,  0, 99, 61);
         let stats_bounds   = Bound::new(79, 0, 99, 49);
         let input_bounds   = Bound::new(0, 50, 99, 52);
@@ -74,22 +75,27 @@ impl Game {
         self.rendering_component.attach_window(&mut self.messages_window);
         self.rendering_component.attach_window(&mut self.map_window);
         for i in npcs.iter() {
-            i.render(self.rendering_component);
+            i.render(&mut self.rendering_component);
         }
-        c.render(self.rendering_component);
+        c.render(&mut self.rendering_component);
         self.rendering_component.after_render_new_frame();
     }
 
     pub fn update(&mut self, npcs: &mut Vec<Box<Actor>>, c: &mut Actor) {
         c.update();
         Game::set_character_point(c.position);
-        for i in npcs.mut_iter() {
+        for i in npcs.iter_mut() {
             i.update();
         }
     }
 
     pub fn wait_for_keypress(&mut self) -> KeyState {
         let ks = self.rendering_component.wait_for_keypress();
+        match ks.key {
+            Printable('/') => self.input_window.buffer_message("FOOL"),
+            _              => {}
+        }
+
         Game::set_last_keypress(ks);
         return ks;
     }
