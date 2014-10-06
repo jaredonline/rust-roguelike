@@ -9,13 +9,13 @@ use self::tcod::KeyState;
 static mut LAST_KEYPRESS : Option<KeyState> = None;
 static mut CHAR_LOCATION : Point = Point { x: 40, y: 25 };
 
-pub struct Game {
+pub struct Game<'a> {
     pub exit:                bool,
     pub window_bounds:       Bound,
-    pub rendering_component: Box<RenderingComponent>
+    pub rendering_component: Box<RenderingComponent + 'a>
 }
 
-impl Game {
+impl<'a> Game<'a> {
     pub fn get_last_keypress() -> Option<KeyState> {
         unsafe { LAST_KEYPRESS }
     }
@@ -32,7 +32,7 @@ impl Game {
         unsafe { CHAR_LOCATION = point; }
     }
 
-    pub fn new() -> Game {
+    pub fn new() -> Game<'a> {
         let  bounds = Bound {
             min: Point { x: 0, y: 0 },
             max: Point { x: 79, y: 49 }
@@ -48,9 +48,9 @@ impl Game {
     pub fn render(&mut self, npcs: &Vec<Box<Actor>>, c: &Actor) {
         self.rendering_component.before_render_new_frame();
         for i in npcs.iter() {
-            i.render(self.rendering_component);
+            i.render(&mut self.rendering_component);
         }
-        c.render(self.rendering_component);
+        c.render(&mut self.rendering_component);
         self.rendering_component.after_render_new_frame();
     }
 
