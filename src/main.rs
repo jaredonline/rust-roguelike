@@ -5,16 +5,17 @@ use dwemthys::game::Game;
 use dwemthys::actor::Actor;
 use dwemthys::rendering::RenderingComponent;
 use dwemthys::movement::MovementComponent;
+use dwemthys::input::{SpecialKey, KeyCode};
 
-use tcod::{Console, key_code, Special};
+use tcod::Console;
 
 fn main() {
     let mut game = Game::new();
-    let mut c = Actor::heroine(game.map_window.get_bounds());
+    let mut c = Actor::heroine(game.windows.map.get_bounds());
     let mut npcs: Vec<Box<Actor>> = vec![
-        box Actor::dog(10, 10, game.map_window.get_bounds()),
-        box Actor::cat(40, 25, game.map_window.get_bounds()),
-        box Actor::kobold(20, 20, game.map_window.get_bounds())
+        box Actor::dog(10, 10, game.windows.map.get_bounds()),
+        box Actor::cat(40, 25, game.windows.map.get_bounds()),
+        box Actor::kobold(20, 20, game.windows.map.get_bounds())
     ];
 
     game.render(&npcs, &c);
@@ -24,8 +25,8 @@ fn main() {
 
         // update game state
         match keypress.key {
-            Special(key_code::Escape) => game.exit = true,
-            _                         => {}
+            SpecialKey(KeyCode::Escape) => game.exit = true,
+            _                           => {}
         }
 
         game.update(&mut npcs, &mut c);

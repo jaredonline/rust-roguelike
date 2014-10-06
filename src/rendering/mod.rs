@@ -1,5 +1,6 @@
 extern crate tcod;
 use self::tcod::{Console, background_flag, KeyState, Color};
+use input::{InputComponent, TcodInputComponent, KeyboardInput};
 
 use util::{Point, Bound};
 
@@ -77,30 +78,40 @@ pub trait WindowComponent {
         messages.insert(0, box message);
         messages.truncate(max);
     }
+
+    fn flush_buffer(&mut self) {
+        let max      = self.get_max_messages();
+        let messages = self.get_mut_messages();
+        
+        for _ in range(0, max) {
+            messages.insert(0, box String::from_str(""));
+        }
+        messages.truncate(max);
+    }
 }
 
 
 window_component_def!(TcodStatsWindowComponent)
 impl WindowComponent for TcodStatsWindowComponent {
-    window_component_init!(TcodStatsWindowComponent, Color::new(255u8, 0u8, 0u8), 10u)
+    window_component_init!(TcodStatsWindowComponent, Color::new(0u8, 0u8, 0u8), 10u)
     window_component_getters!()
 }
 
 window_component_def!(TcodInputWindowComponent)
 impl WindowComponent for TcodInputWindowComponent {
-    window_component_init!(TcodInputWindowComponent, Color::new(0u8, 255u8, 0u8), 2u)
+    window_component_init!(TcodInputWindowComponent, Color::new(0u8, 0u8, 0u8), 2u)
     window_component_getters!()
 }
 
 window_component_def!(TcodMapWindowComponent)
 impl WindowComponent for TcodMapWindowComponent {
-    window_component_init!(TcodMapWindowComponent, Color::new(255u8, 255u8, 255u8), 10u)
+    window_component_init!(TcodMapWindowComponent, Color::new(0u8, 0u8, 0u8), 10u)
     window_component_getters!()
 }
 
 window_component_def!(TcodMessagesWindowComponent)
 impl WindowComponent for TcodMessagesWindowComponent {
-    window_component_init!(TcodMessagesWindowComponent, Color::new(0u8, 0u8, 255u8), 10u)
+    window_component_init!(TcodMessagesWindowComponent, Color::new(0u8, 0u8, 0u8), 10u)
     window_component_getters!()
 }
 
@@ -109,24 +120,28 @@ pub trait RenderingComponent {
     fn before_render_new_frame(&mut self);
     fn render_object(&mut self, Point, char);
     fn after_render_new_frame(&mut self);
-    fn wait_for_keypress(&self) -> KeyState;
+    fn wait_for_keypress(&self) -> KeyboardInput;
     fn attach_window(&mut self, &mut Box<WindowComponent>);
 }
 
-pub struct TcodRenderingComponent {
-    pub console: Console
+pub struct TcodRenderingComponent<'a> {
+    pub console: Console,
+    pub input_component: Box<InputComponent<KeyState> + 'a>
 }
 
-impl RenderingComponent for TcodRenderingComponent {
-    fn new(bounds: Bound) -> TcodRenderingComponent {
+impl<'a> RenderingComponent for TcodRenderingComponent<'a> {
+    fn new(bounds: Bound) -> TcodRenderingComponent<'a> {
         let console = Console::init_root(
             (bounds.max.x + 1) as int,
             (bounds.max.y + 1) as int,
             "libtcod Rust tutorial", false
         );
 
+        let ic : Box<TcodInputComponent> = box InputComponent::new();
+
         TcodRenderingComponent {
-            console: console
+            console: console,
+            input_component: ic
         }
     }
 
@@ -158,7 +173,8 @@ impl RenderingComponent for TcodRenderingComponent {
         self.console.flush();
     }
 
-    fn wait_for_keypress(&self) -> KeyState {
-      self.console.wait_for_keypress(true)
+    fn wait_for_keypress(&self) -> KeyboardInput {
+      let ks = self.console.wait_for_keypress(true);
+      self.input_component.translate_input(ks)
     }
 }
