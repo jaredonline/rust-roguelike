@@ -1,6 +1,7 @@
-use util::{Point, Bound};
-use game::{Game, Windows};
-use rendering::RenderingComponent;
+use util::{Point, Bound,};
+use game::Game;
+use rendering::renderers::RenderingComponent;
+use rendering::windows::Windows;
 use movement::{AggroMovementComponent, RandomMovementComponent, UserMovementComponent, MovementComponent};
 
 pub struct Actor<'a> {

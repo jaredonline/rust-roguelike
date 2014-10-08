@@ -1,9 +1,10 @@
 extern crate tcod;
 
-use util::{Point, Bound};
-use rendering::{RenderingComponent, WindowComponent};
-use rendering::{
-    TcodRenderingComponent,
+use util::{Point, Bound,};
+use rendering::renderers::{RenderingComponent, TcodRenderingComponent};
+use rendering::windows::{
+    Windows,
+    WindowComponent,
     TcodStatsWindowComponent,
     TcodInputWindowComponent,
     TcodMapWindowComponent,
@@ -15,31 +16,11 @@ use input::{KeyboardInput, Printable, SpecialKey, KeyCode};
 static mut LAST_KEYPRESS : Option<KeyboardInput> = None;
 static mut CHAR_LOCATION : Point = Point { x: 40, y: 25 };
 
-pub struct Windows<'a> {
-    pub stats:    Box<WindowComponent + 'a>,
-    pub map:      Box<WindowComponent + 'a>,
-    pub input:    Box<WindowComponent + 'a>,
-    pub messages: Box<WindowComponent + 'a>
-}
-
-impl<'a > Windows<'a > {
-    fn all_windows(&'a mut self) -> Vec<&mut Box<WindowComponent>> {
-        let windows = vec![
-            &mut self.stats,
-            &mut self.input,
-            &mut self.messages,
-            &mut self.map
-        ];
-
-        return windows;
-    }
-}
-
 pub struct Game<'a> {
     pub exit:                bool,
     pub window_bounds:       Bound,
-    pub rendering_component: Box<RenderingComponent       + 'a>,
-    pub game_state:          Box<GameState                + 'a>,
+    pub rendering_component: Box<RenderingComponent + 'a>,
+    pub game_state:          Box<GameState          + 'a>,
     pub windows:             Windows<'a>
 }
 

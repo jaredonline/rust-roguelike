@@ -1,5 +1,5 @@
 use input::{SpecialKey, KeyCode};
-use game::{Game, Windows};
+use game::Game;
 use util::{
     Bound,
     Point,
@@ -14,6 +14,8 @@ use util::{
     PointsEqual,
     PointsNotEqual
 };
+use rendering::windows::Windows;
+
 use std;
 use std::rand::Rng;
 
