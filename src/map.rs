@@ -30,10 +30,10 @@ impl<'a> Maps<'a> {
     }
 
     pub fn update(&mut self, windows: &mut Windows) {
+        self.pcs.update(windows);
         self.terrain.update(windows);
         self.friends.update(windows);
         self.enemies.update(windows);
-        self.pcs.update(windows);
     }
 
     pub fn render(&mut self, renderer: &mut Box<RenderingComponent>) {
