@@ -1,7 +1,9 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use input::{SpecialKey, KeyCode};
-use game::Game;
+use game::MoveInfo;
 use util::{
-    Bound,
     Point,
     DoesContain,
     DoesNotContain,
@@ -20,29 +22,28 @@ use std;
 use std::rand::Rng;
 
 pub trait MovementComponent {
-    fn new(Bound) -> Self;
+    fn new(Rc<RefCell<MoveInfo>>) -> Self;
     fn update(&self, Point, &mut Windows) -> Point;
-}
-
-pub struct RandomMovementComponent {
-    window_bounds: Bound
-}
-
-pub struct UserMovementComponent {
-    window_bounds: Bound
+    fn box_clone(&self) -> Box<MovementComponent>;
 }
 
 pub struct AggroMovementComponent {
-    window_bounds: Bound
+    move_info: Rc<RefCell<MoveInfo>>
 }
 
 impl MovementComponent for AggroMovementComponent {
-    fn new(bound: Bound) -> AggroMovementComponent {
-        AggroMovementComponent { window_bounds: bound }
+    fn new(move_info: Rc<RefCell<MoveInfo>>) -> AggroMovementComponent {
+        AggroMovementComponent { move_info: move_info }
+    }
+
+    fn box_clone(&self) -> Box<MovementComponent> {
+        box AggroMovementComponent { move_info: self.move_info.clone() }
     }
 
     fn update(&self, point: Point, _: &mut Windows) -> Point {
-        let char_point = Game::get_character_point();
+        let char_point = {
+            self.move_info.borrow().deref().char_location
+        };
         let mut offset = Point { x: 0, y: 0 };
         match point.compare_x(char_point) {
             RightOfPoint => offset = offset.offset_x(-1),
@@ -59,7 +60,10 @@ impl MovementComponent for AggroMovementComponent {
         match point.offset(offset).compare(char_point) {
             PointsEqual    => { return point; },
             PointsNotEqual => {
-                match self.window_bounds.contains(point.offset(offset)) {
+                let bound = {
+                    self.move_info.borrow().deref().bounds
+                };
+                match bound.contains(point.offset(offset)) {
                     DoesContain    => { return point.offset(offset); }
                     DoesNotContain => { return point; }
                 }
@@ -68,14 +72,25 @@ impl MovementComponent for AggroMovementComponent {
     }
 }
 
+pub struct UserMovementComponent {
+    move_info: Rc<RefCell<MoveInfo>>
+}
+
 impl MovementComponent for UserMovementComponent {
-    fn new(bound: Bound) -> UserMovementComponent {
-        UserMovementComponent { window_bounds: bound }
+    fn new(move_info: Rc<RefCell<MoveInfo>>) -> UserMovementComponent {
+        UserMovementComponent { move_info: move_info }
+    }
+
+    fn box_clone(&self) -> Box<MovementComponent> {
+        box UserMovementComponent { move_info: self.move_info.clone() }
     }
 
     fn update(&self, point: Point, windows: &mut Windows) -> Point {
-        let mut offset = Point { x: point.x, y: point.y };
-        offset = match Game::get_last_keypress() {
+        let mut offset = point.clone();
+        let last_keypress = {
+            self.move_info.borrow().deref().last_keypress
+        };
+        offset = match last_keypress {
             Some(keypress) => {
                 match keypress.key {
                     SpecialKey(KeyCode::Up) => {
@@ -96,7 +111,10 @@ impl MovementComponent for UserMovementComponent {
             None => { offset }
         };
 
-        match self.window_bounds.contains(offset) {
+        let bound = {
+            self.move_info.borrow().deref().bounds
+        };
+        match bound.contains(offset) {
             DoesContain    => {
                 offset
             }
@@ -108,21 +126,35 @@ impl MovementComponent for UserMovementComponent {
     }
 }
 
+pub struct RandomMovementComponent {
+    move_info: Rc<RefCell<MoveInfo>>
+}
+
 impl MovementComponent for RandomMovementComponent {
-    fn new(bound: Bound) -> RandomMovementComponent {
-        RandomMovementComponent { window_bounds: bound }
+    fn new(move_info: Rc<RefCell<MoveInfo>>) -> RandomMovementComponent {
+        RandomMovementComponent { move_info: move_info }
+    }
+
+    fn box_clone(&self) -> Box<MovementComponent> {
+        box RandomMovementComponent { move_info: self.move_info.clone() }
     }
 
     fn update(&self, point: Point, _: &mut Windows) -> Point {
         let mut offset = Point { x: point.x, y: point.y };
         let offset_x = std::rand::task_rng().gen_range(0, 3i32) - 1;
-        match self.window_bounds.contains(offset.offset_x(offset_x)) {
+        let bound = {
+            self.move_info.borrow().deref().bounds
+        };
+        match bound.contains(offset.offset_x(offset_x)) {
             DoesContain    => offset = offset.offset_x(offset_x),
             DoesNotContain => { return point; }
         }
 
         let offset_y = std::rand::task_rng().gen_range(0, 3i32) - 1;
-        match self.window_bounds.contains(offset.offset_y(offset_y)) {
+        let bound = {
+            self.move_info.borrow().deref().bounds
+        };
+        match bound.contains(offset.offset_y(offset_y)) {
             DoesContain    => offset = offset.offset_y(offset_y),
             DoesNotContain => { return point; }
         }
