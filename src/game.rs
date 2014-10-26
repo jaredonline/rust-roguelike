@@ -17,7 +17,6 @@ use input::{KeyboardInput, Printable, SpecialKey, KeyCode};
 use map::Maps;
 
 pub struct MoveInfo {
-    pub exit: bool,
     pub last_keypress: Option<KeyboardInput>,
     pub char_location: Point,
     pub bounds: Bound
@@ -26,7 +25,6 @@ pub struct MoveInfo {
 impl MoveInfo {
     pub fn new(bound: Bound) -> MoveInfo {
         MoveInfo {
-            exit: false,
             last_keypress: None,
             char_location: Point::new(40, 25),
             bounds: bound
