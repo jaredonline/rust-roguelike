@@ -1,5 +1,5 @@
 extern crate tcod;
-use self::tcod::{Console, background_flag, Color};
+use self::tcod::{Console, background_flag,};
 
 use util::{Bound};
 
@@ -7,7 +7,8 @@ macro_rules! window_component_getters(
     () => {
         fn get_console(&mut self)      -> &mut Console          { &mut self.console     }
         fn get_bounds(&self)           ->      Bound            { self.bounds           }
-        fn get_bg_color(&self)         ->      Color            { self.background_color }
+        fn get_bg_color(&self)         ->      tcod::Color      { self.background_color }
+        fn get_fg_color(&self)         ->      tcod::Color      { self.foreground_color }
         fn get_mut_messages(&mut self) -> &mut Vec<Box<String>> { &mut self.messages    } 
         fn get_max_messages(&self)     ->      uint             { self.max_messages     }
         fn get_messages(&self)         ->      Vec<Box<String>> { self.messages.clone() }
@@ -18,7 +19,8 @@ macro_rules! window_component_def(
     ($name:ident) => {
         pub struct $name {
             pub console:          Console,
-            pub background_color: Color,
+            pub background_color: tcod::Color,
+            pub foreground_color: tcod::Color,
             pub bounds:           Bound,
             messages:             Vec<Box<String>>,
             max_messages:         uint
@@ -27,7 +29,7 @@ macro_rules! window_component_def(
 )
 
 macro_rules! window_component_init(
-    ($name:ident, $color:expr, $max_messages:expr) => {
+    ($name:ident, $bg_color:expr, $fg_color:expr, $max_messages:expr) => {
         fn new(bounds: Bound) -> $name {
             let height = bounds.max.y - bounds.min.y + 1;
             let width  = bounds.max.x - bounds.min.x + 1;
@@ -38,7 +40,8 @@ macro_rules! window_component_init(
 
             $name {
                 console:          console,
-                background_color: $color,
+                background_color: $bg_color,
+                foreground_color: $fg_color,
                 bounds:           bounds,
                 messages:         vec![],
                 max_messages:     $max_messages
@@ -50,17 +53,20 @@ macro_rules! window_component_init(
 pub trait WindowComponent {
     fn new(Bound) -> Self;
 
-    fn get_bounds(&self)       -> Bound;
-    fn get_bg_color(&self)     -> Color;
-    fn get_console(&mut self)  -> &mut Console;
+    fn get_bounds(&self)           -> Bound;
+    fn get_bg_color(&self)         -> tcod::Color;
+    fn get_fg_color(&self)         -> tcod::Color;
+    fn get_console(&mut self)      -> &mut Console;
     fn get_mut_messages(&mut self) -> &mut Vec<Box<String>>;
-    fn get_max_messages(&self) -> uint;
-    fn get_messages(&self) -> Vec<Box<String>>;
+    fn get_max_messages(&self)     -> uint;
+    fn get_messages(&self)         -> Vec<Box<String>>;
 
     fn clear(&mut self) {
-        let color   = self.get_bg_color();
-        let console = self.get_console();
-        console.set_default_background(color);
+        let bg_color = self.get_bg_color();
+        let fg_color = self.get_fg_color();
+        let console  = self.get_console();
+        console.set_default_background(bg_color);
+        console.set_default_foreground(fg_color);
         console.clear();
     }
 
@@ -92,25 +98,25 @@ pub trait WindowComponent {
 
 window_component_def!(TcodStatsWindowComponent)
 impl WindowComponent for TcodStatsWindowComponent {
-    window_component_init!(TcodStatsWindowComponent, Color::new(0u8, 0u8, 0u8), 10u)
+    window_component_init!(TcodStatsWindowComponent, tcod::Color::new(0u8, 0u8, 0u8), tcod::Color::new(255u8, 255u8, 255u8), 10u)
     window_component_getters!()
 }
 
 window_component_def!(TcodInputWindowComponent)
 impl WindowComponent for TcodInputWindowComponent {
-    window_component_init!(TcodInputWindowComponent, Color::new(0u8, 0u8, 0u8), 2u)
+    window_component_init!(TcodInputWindowComponent, tcod::Color::new(255u8, 255u8, 255u8), tcod::Color::new(0u8, 0u8, 0u8), 1u)
     window_component_getters!()
 }
 
 window_component_def!(TcodMapWindowComponent)
 impl WindowComponent for TcodMapWindowComponent {
-    window_component_init!(TcodMapWindowComponent, Color::new(0u8, 0u8, 0u8), 10u)
+    window_component_init!(TcodMapWindowComponent, tcod::Color::new(0u8, 0u8, 0u8), tcod::Color::new(255u8, 255u8, 255u8), 10u)
     window_component_getters!()
 }
 
 window_component_def!(TcodMessagesWindowComponent)
 impl WindowComponent for TcodMessagesWindowComponent {
-    window_component_init!(TcodMessagesWindowComponent, Color::new(0u8, 0u8, 0u8), 10u)
+    window_component_init!(TcodMessagesWindowComponent, tcod::Color::new(0u8, 0u8, 0u8), tcod::Color::new(160u8, 160u8, 160u8), 10u)
     window_component_getters!()
 }
 
