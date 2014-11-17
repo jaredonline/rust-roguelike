@@ -51,7 +51,7 @@ pub struct Game<'a, 'b> {
     pub rendering_component: Box<RenderingComponent + 'a>,
     pub game_state:          Box<GameState<'a>      + 'a>,
     pub windows:             Windows<'a>,
-    pub maps:                Maps<'b>
+    pub maps:                Maps
 }
 
 impl<'a, 'b> Game<'a, 'b> {

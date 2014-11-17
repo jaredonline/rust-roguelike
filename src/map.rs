@@ -7,15 +7,15 @@ use rendering::windows::Windows;
 use rendering::renderers::RenderingComponent;
 use game::MoveInfo;
 
-pub struct Maps<'a> {
-    pub terrain: Box<Map<'a>>,
-    pub enemies: Box<Map<'a>>,
-    pub friends: Box<Map<'a>>,
-    pub pcs:     Box<Map<'a>>
+pub struct Maps {
+    pub terrain: Box<Map>,
+    pub enemies: Box<Map>,
+    pub friends: Box<Map>,
+    pub pcs:     Box<Map>
 }
 
-impl<'a> Maps<'a> {
-    pub fn new(move_info: Rc<RefCell<MoveInfo>>) -> Maps<'a> {
+impl Maps {
+    pub fn new(move_info: Rc<RefCell<MoveInfo>>) -> Maps {
         let terrain = box Map::new(move_info.clone());
         let enemies = box Map::new(move_info.clone());
         let friends = box Map::new(move_info.clone());
@@ -29,7 +29,7 @@ impl<'a> Maps<'a> {
         }
     }
 
-    pub fn update(&'a mut self, windows: &mut Windows) {
+    pub fn update(&mut self, windows: &mut Windows) {
         self.pcs.update(windows);
         self.terrain.update(windows);
         self.friends.update(windows);
@@ -53,15 +53,15 @@ impl<'a> Maps<'a> {
     }
 }
 
-pub struct Map<'a> {
-    pub content:   Vec<Vec<Vec<Box<Actor<'a>>>>>,
+pub struct Map {
+    pub content:   Vec<Vec<Vec<Box<Actor>>>>,
     pub size:      Bound,
     pub move_info: Rc<RefCell<MoveInfo>>
 }
 
 
-impl<'a> Map<'a> {
-    pub fn new(move_info: Rc<RefCell<MoveInfo>>) -> Map<'a> {
+impl Map {
+    pub fn new(move_info: Rc<RefCell<MoveInfo>>) -> Map {
         let size    = {
             move_info.borrow().deref().bounds
         };
@@ -73,7 +73,7 @@ impl<'a> Map<'a> {
         }
     }
 
-    pub fn init_contents(size: Bound) -> Vec<Vec<Vec<Box<Actor<'a>>>>> {
+    pub fn init_contents(size: Bound) -> Vec<Vec<Vec<Box<Actor>>>> {
         let mut contents : Vec<Vec<Vec<Box<Actor>>>> = vec![];
         for _ in range(0, size.max.x) {
             let mut x_vec : Vec<Vec<Box<Actor>>> = vec![];
@@ -86,7 +86,7 @@ impl<'a> Map<'a> {
         return contents;
     }
 
-    pub fn push_actor(&mut self, point: Point, actor: Box<Actor<'a>>) {
+    pub fn push_actor(&mut self, point: Point, actor: Box<Actor>) {
         self.content[point.x as uint][point.y as uint].push(actor);
     }
 
@@ -100,7 +100,7 @@ impl<'a> Map<'a> {
                         { self.move_info.borrow_mut().deref_mut().char_location = actor.position };
                     }
                     let point = actor.position;
-                    let new_actor = box actor.clone();
+                    let new_actor = actor.clone();
                     new_content[point.x as uint][point.y as uint].push(new_actor);
                 }
             }
