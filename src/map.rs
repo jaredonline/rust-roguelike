@@ -86,8 +86,8 @@ impl<'a> Map<'a> {
         return contents;
     }
 
-    pub fn push_actor(&mut self, point: Point, actor: Box<Actor>) {
-        self.content.get_mut(point.x as uint).get_mut(point.y as uint).push(actor);
+    pub fn push_actor(&mut self, point: Point, actor: Box<Actor<'a>>) {
+        self.content[point.x as uint][point.y as uint].push(actor);
     }
 
     pub fn update(&mut self, windows: &mut Windows) {
@@ -101,7 +101,7 @@ impl<'a> Map<'a> {
                     }
                     let point = actor.position;
                     let new_actor = actor.clone();
-                    new_content.get_mut(point.x as uint).get_mut(point.y as uint).push(new_actor);
+                    new_content[point.x as uint][point.y as uint].push(new_actor);
                 }
             }
         }

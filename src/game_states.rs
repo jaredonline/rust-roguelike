@@ -8,9 +8,9 @@ use game::MoveInfo;
 use input::{KeyCode, SpecialKey};
 use combat::{Weapon, Boomerang};
 
-pub trait GameState {
+pub trait GameState<'a> {
     fn new() -> Self;
-    fn new_with_weapon(Box<Weapon>) -> Self;
+    fn new_with_weapon(Box<Weapon + 'a>) -> Self;
 
     fn enter(&self, &mut Windows) {}
     fn exit(&self)  {}
@@ -31,12 +31,12 @@ pub trait GameState {
 
 pub struct MovementGameState;
 
-impl GameState for MovementGameState {
+impl<'a> GameState<'a> for MovementGameState {
     fn new() -> MovementGameState {
         MovementGameState
     }
 
-    fn new_with_weapon(_: Box<Weapon>) -> MovementGameState {
+    fn new_with_weapon(_: Box<Weapon + 'a>) -> MovementGameState {
         MovementGameState
     }
 
@@ -74,7 +74,7 @@ pub struct AttackInputGameState<'a> {
     pub weapon: Box<Weapon + 'a>
 }
 
-impl<'a> GameState for AttackInputGameState<'a> {
+impl<'a> GameState<'a> for AttackInputGameState<'a> {
     fn new() -> AttackInputGameState<'a> {
         let weapon : Box<Boomerang> = box Weapon::new();
         AttackInputGameState {
@@ -83,7 +83,7 @@ impl<'a> GameState for AttackInputGameState<'a> {
         }
     }
 
-    fn new_with_weapon(weapon: Box<Weapon>) -> AttackInputGameState<'a> {
+    fn new_with_weapon(weapon: Box<Weapon + 'a>) -> AttackInputGameState<'a> {
         AttackInputGameState {
             should_update_state: false,
             weapon: weapon

@@ -49,7 +49,7 @@ pub struct Game<'a, 'b> {
     pub exit:                bool,
     pub window_bounds:       Bound,
     pub rendering_component: Box<RenderingComponent + 'a>,
-    pub game_state:          Box<GameState          + 'a>,
+    pub game_state:          Box<GameState<'a>      + 'a>,
     pub windows:             Windows<'a>,
     pub maps:                Maps<'b>
 }
