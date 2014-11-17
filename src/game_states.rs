@@ -15,7 +15,7 @@ pub trait GameState<'a> {
     fn enter(&self, &mut Windows) {}
     fn exit(&self)  {}
 
-    fn update(&mut self, maps: &mut Maps, windows: &mut Windows, Rc<RefCell<MoveInfo>>);
+    fn update<'b>(&mut self, maps: &'b mut Maps<'b>, windows: &mut Windows, Rc<RefCell<MoveInfo>>);
     fn render<'r>(&mut self, renderer: &mut Box<RenderingComponent>, maps: &mut Maps, windows: &'r mut Windows<'r>) {
         renderer.before_render_new_frame();
         let mut all_windows = windows.all_windows();
@@ -48,7 +48,7 @@ impl<'a> GameState<'a> for MovementGameState {
         windows.input.flush_buffer();
     }
 
-    fn update(&mut self, maps: &mut Maps, windows: &mut Windows, move_info: Rc<RefCell<MoveInfo>>) {
+    fn update<'b>(&mut self, maps: &'b mut Maps<'b>, windows: &mut Windows, move_info: Rc<RefCell<MoveInfo>>) {
         let last_keypress = {
             move_info.borrow().deref().last_keypress
         };
@@ -102,7 +102,7 @@ impl<'a> GameState<'a> for AttackInputGameState<'a> {
         windows.input.buffer_message(msg.as_slice())
     }
 
-    fn update(&mut self, maps: &mut Maps, windows: &mut Windows, move_info: Rc<RefCell<MoveInfo>>) {
+    fn update<'b>(&mut self, maps: &'b mut Maps<'b>, windows: &mut Windows, move_info: Rc<RefCell<MoveInfo>>) {
         let last_keypress = {
             move_info.borrow().deref().last_keypress
         };

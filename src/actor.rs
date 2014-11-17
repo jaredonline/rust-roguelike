@@ -17,15 +17,8 @@ pub struct Actor<'a> {
     pub health: u8
 }
 
-impl<'a> Clone for Actor<'a> {
-    fn clone(&self) -> Actor<'a> {
-        let mc = self.movement_component.box_clone();
-        Actor::new(self.position.x, self.position.y, self.display_char, mc, self.is_pc, self.foreground, self.background, self.health)
-    }
-}
-
 impl<'a> Actor<'a> {
-    pub fn new(x: i32, y: i32, dc: char, mc: Box<MovementComponent>, is_pc: bool, foreground: Color, background: Color, health: u8) -> Actor<'a> {
+    pub fn new(x: i32, y: i32, dc: char, mc: Box<MovementComponent + 'a>, is_pc: bool, foreground: Color, background: Color, health: u8) -> Actor<'a> {
         Actor {
             position: Point { x: x, y: y },
             display_char: dc,
@@ -35,6 +28,11 @@ impl<'a> Actor<'a> {
             background: background,
             health: health
         }
+    }
+
+    fn clone(&'a self) -> Actor<'a> {
+        let mc = self.movement_component.box_clone();
+        Actor::new(self.position.x, self.position.y, self.display_char, mc, self.is_pc, self.foreground, self.background, self.health)
     }
 
     pub fn dog(x: i32, y: i32, move_info: Rc<RefCell<MoveInfo>>) -> Actor<'a> {

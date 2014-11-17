@@ -29,7 +29,7 @@ impl<'a> Maps<'a> {
         }
     }
 
-    pub fn update(&mut self, windows: &mut Windows) {
+    pub fn update(&'a mut self, windows: &mut Windows) {
         self.pcs.update(windows);
         self.terrain.update(windows);
         self.friends.update(windows);
@@ -90,7 +90,7 @@ impl<'a> Map<'a> {
         self.content[point.x as uint][point.y as uint].push(actor);
     }
 
-    pub fn update(&mut self, windows: &mut Windows) {
+    pub fn update(&'a mut self, windows: &mut Windows) {
         let mut new_content = Map::init_contents(self.size);
         for x_iter in self.content.iter_mut() {
             for y_iter in x_iter.iter_mut() {
@@ -100,7 +100,7 @@ impl<'a> Map<'a> {
                         { self.move_info.borrow_mut().deref_mut().char_location = actor.position };
                     }
                     let point = actor.position;
-                    let new_actor = actor.clone();
+                    let new_actor = box actor.clone();
                     new_content[point.x as uint][point.y as uint].push(new_actor);
                 }
             }
