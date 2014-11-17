@@ -30,7 +30,7 @@ impl<'a> Actor<'a> {
         }
     }
 
-    fn clone(&'a self) -> Actor<'a> {
+    pub fn clone(&'a self) -> Actor<'a> {
         let mc = self.movement_component.box_clone();
         Actor::new(self.position.x, self.position.y, self.display_char, mc, self.is_pc, self.foreground, self.background, self.health)
     }

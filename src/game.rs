@@ -96,7 +96,7 @@ impl<'a, 'b> Game<'a, 'b> {
         self.game_state.render(&mut self.rendering_component, &mut self.maps, &mut self.windows);
     }
 
-    pub fn update(&'a mut self) {
+    pub fn update(&'b mut self) {
         if self.game_state.should_update_state() {
             self.game_state.exit();
             self.update_state();

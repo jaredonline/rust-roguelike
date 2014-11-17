@@ -90,7 +90,7 @@ impl<'a> Map<'a> {
         self.content[point.x as uint][point.y as uint].push(actor);
     }
 
-    pub fn update(&'a mut self, windows: &mut Windows) {
+    pub fn update(&mut self, windows: &mut Windows) {
         let mut new_content = Map::init_contents(self.size);
         for x_iter in self.content.iter_mut() {
             for y_iter in x_iter.iter_mut() {
