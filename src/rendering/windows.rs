@@ -120,25 +120,14 @@ impl WindowComponent for TcodMessagesWindowComponent {
     window_component_getters!()
 }
 
-pub struct Windows<'a> {
-    pub stats:    Box<WindowComponent + 'a>,
-    pub map:      Box<WindowComponent + 'a>,
-    pub input:    Box<WindowComponent + 'a>,
-    pub messages: Box<WindowComponent + 'a>
+pub struct Windows {
+    pub stats:    Box<WindowComponent + 'static>,
+    pub map:      Box<WindowComponent + 'static>,
+    pub input:    Box<WindowComponent + 'static>,
+    pub messages: Box<WindowComponent + 'static>
 }
 
-impl<'a > Windows<'a > {
-    pub fn all_windows(&'a mut self) -> Vec<&mut Box<WindowComponent>> {
-        let windows = vec![
-            &mut self.stats,
-            &mut self.input,
-            &mut self.messages,
-            &mut self.map
-        ];
-
-        return windows;
-    }
-
+impl Windows {
     pub fn get_map_bounds(&self) -> Bound {
         self.map.get_bounds()
     }

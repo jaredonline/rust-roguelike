@@ -8,20 +8,27 @@ use game::MoveInfo;
 use input::{KeyCode, SpecialKey};
 use combat::{Weapon, Boomerang};
 
-pub trait GameState<'a> {
+pub trait GameState {
     fn new() -> Self;
-    fn new_with_weapon(Box<Weapon + 'a>) -> Self;
+    fn new_with_weapon(Box<Weapon + 'static>) -> Self;
 
     fn enter(&self, &mut Windows) {}
     fn exit(&self)  {}
 
     fn update(&mut self, maps: &mut Maps, windows: &mut Windows, Rc<RefCell<MoveInfo>>);
-    fn render<'r>(&mut self, renderer: &mut Box<RenderingComponent>, maps: &mut Maps, windows: &'r mut Windows<'r>) {
+    fn render(&mut self, renderer: &mut Box<RenderingComponent>, maps: &mut Maps, windows: &mut Windows) {
         renderer.before_render_new_frame();
-        let mut all_windows = windows.all_windows();
-        for window in all_windows.iter_mut() {
-            renderer.attach_window(*window);
-        }
+        let ref mut stats = windows.stats;
+        renderer.attach_window(stats);
+
+        let ref mut input = windows.input;
+        renderer.attach_window(input);
+
+        let ref mut messages = windows.messages;
+        renderer.attach_window(messages);
+
+        let ref mut map = windows.map;
+        renderer.attach_window(map);
         maps.render(renderer);
         renderer.after_render_new_frame();
     }
@@ -31,12 +38,12 @@ pub trait GameState<'a> {
 
 pub struct MovementGameState;
 
-impl<'a> GameState<'a> for MovementGameState {
+impl GameState for MovementGameState {
     fn new() -> MovementGameState {
         MovementGameState
     }
 
-    fn new_with_weapon(_: Box<Weapon + 'a>) -> MovementGameState {
+    fn new_with_weapon(_: Box<Weapon>) -> MovementGameState {
         MovementGameState
     }
 
@@ -69,13 +76,13 @@ impl<'a> GameState<'a> for MovementGameState {
     }
 }
 
-pub struct AttackInputGameState<'a> {
+pub struct AttackInputGameState {
     should_update_state: bool,
-    pub weapon: Box<Weapon + 'a>
+    pub weapon: Box<Weapon + 'static>
 }
 
-impl<'a> GameState<'a> for AttackInputGameState<'a> {
-    fn new() -> AttackInputGameState<'a> {
+impl GameState for AttackInputGameState {
+    fn new() -> AttackInputGameState {
         let weapon : Box<Boomerang> = box Weapon::new();
         AttackInputGameState {
             should_update_state: false,
@@ -83,7 +90,7 @@ impl<'a> GameState<'a> for AttackInputGameState<'a> {
         }
     }
 
-    fn new_with_weapon(weapon: Box<Weapon + 'a>) -> AttackInputGameState<'a> {
+    fn new_with_weapon(weapon: Box<Weapon + 'static>) -> AttackInputGameState {
         AttackInputGameState {
             should_update_state: false,
             weapon: weapon

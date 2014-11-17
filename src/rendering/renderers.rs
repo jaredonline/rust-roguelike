@@ -27,13 +27,13 @@ pub trait RenderingComponent {
     fn translate_color(&self, Color) -> tcod::Color;
 }
 
-pub struct TcodRenderingComponent<'a> {
+pub struct TcodRenderingComponent {
     pub console: Console,
-    pub input_component: Box<InputComponent<KeyState> + 'a>
+    pub input_component: Box<InputComponent<KeyState> + 'static>
 }
 
-impl<'a> RenderingComponent for TcodRenderingComponent<'a> {
-    fn new(bounds: Bound) -> TcodRenderingComponent<'a> {
+impl RenderingComponent for TcodRenderingComponent {
+    fn new(bounds: Bound) -> TcodRenderingComponent {
         let console = Console::init_root(
             (bounds.max.x + 1) as int,
             (bounds.max.y + 1) as int,

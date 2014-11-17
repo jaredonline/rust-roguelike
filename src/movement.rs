@@ -24,7 +24,7 @@ use std::rand::Rng;
 pub trait MovementComponent {
     fn new(Rc<RefCell<MoveInfo>>) -> Self;
     fn update(&self, Point, &mut Windows) -> Point;
-    fn box_clone(&self) -> Box<MovementComponent>;
+    fn box_clone(&self) -> Box<MovementComponent + 'static>;
 }
 
 pub struct AggroMovementComponent {
@@ -36,7 +36,7 @@ impl MovementComponent for AggroMovementComponent {
         AggroMovementComponent { move_info: move_info }
     }
 
-    fn box_clone(&self) -> Box<MovementComponent> {
+    fn box_clone(&self) -> Box<MovementComponent + 'static> {
         box AggroMovementComponent { move_info: self.move_info.clone() }
     }
 
@@ -81,7 +81,7 @@ impl MovementComponent for UserMovementComponent {
         UserMovementComponent { move_info: move_info }
     }
 
-    fn box_clone(&self) -> Box<MovementComponent> {
+    fn box_clone(&self) -> Box<MovementComponent + 'static> {
         box UserMovementComponent { move_info: self.move_info.clone() }
     }
 
@@ -135,7 +135,7 @@ impl MovementComponent for RandomMovementComponent {
         RandomMovementComponent { move_info: move_info }
     }
 
-    fn box_clone(&self) -> Box<MovementComponent> {
+    fn box_clone(&self) -> Box<MovementComponent + 'static> {
         box RandomMovementComponent { move_info: self.move_info.clone() }
     }
 

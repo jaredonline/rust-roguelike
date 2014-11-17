@@ -44,18 +44,18 @@ impl MoveInfo {
     }
 }
 
-pub struct Game<'a, 'b> {
+pub struct Game {
     pub move_info:           Rc<RefCell<MoveInfo>>,
     pub exit:                bool,
     pub window_bounds:       Bound,
-    pub rendering_component: Box<RenderingComponent + 'a>,
-    pub game_state:          Box<GameState<'a>      + 'a>,
-    pub windows:             Windows<'a>,
+    pub rendering_component: Box<RenderingComponent + 'static>,
+    pub game_state:          Box<GameState      + 'static>,
+    pub windows:             Windows,
     pub maps:                Maps
 }
 
-impl<'a, 'b> Game<'a, 'b> {
-    pub fn new() -> Game<'a, 'b> {
+impl Game {
+    pub fn new() -> Game {
         let total_bounds   = Bound::new(0,  0, 99, 61);
         let stats_bounds   = Bound::new(79, 0, 99, 49);
         let input_bounds   = Bound::new(0, 50, 99, 51);
@@ -92,11 +92,11 @@ impl<'a, 'b> Game<'a, 'b> {
         }
     }
 
-    pub fn render(&'a mut self) {
+    pub fn render(&mut self) {
         self.game_state.render(&mut self.rendering_component, &mut self.maps, &mut self.windows);
     }
 
-    pub fn update(&'b mut self) {
+    pub fn update(&mut self) {
         if self.game_state.should_update_state() {
             self.game_state.exit();
             self.update_state();

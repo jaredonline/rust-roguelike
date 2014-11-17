@@ -18,7 +18,7 @@ pub struct Actor {
 }
 
 impl Clone for Actor {
-    pub fn clone(&self) -> Actor {
+    fn clone(&self) -> Actor {
         let mc = self.movement_component.box_clone();
         Actor::new(self.position.x, self.position.y, self.display_char, mc, self.is_pc, self.foreground, self.background, self.health)
     }
