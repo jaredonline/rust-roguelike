@@ -75,11 +75,11 @@ impl<'a> RenderingComponent for TcodRenderingComponent<'a> {
     }
 
     fn after_render_new_frame(&mut self) {
-        self.console.flush();
+        Console::flush();
     }
 
     fn wait_for_keypress(&self) -> KeyboardInput {
-      let ks = self.console.wait_for_keypress(true);
+      let ks = Console::wait_for_keypress(true);
       self.input_component.translate_input(ks)
     }
 
