@@ -2,10 +2,12 @@ use std::num;
 use std::rand;
 use std::rand::distributions::{IndependentSample, Range};
 
+use actor::Actor;
+
 pub trait Weapon {
     fn new() -> Self;
     fn get_name(&self) -> String;
-    fn deal_damage(&self) -> u16;
+    fn deal_damage(&self, &Box<Actor>) -> u16;
 }
 
 pub struct Boomerang {
@@ -25,7 +27,7 @@ impl Weapon for Boomerang {
         self.name.clone()
     }
 
-    fn deal_damage(&self) -> u16 {
+    fn deal_damage(&self, _: &Box<Actor>) -> u16 {
         self.base_damage as u16
     }
 }
@@ -50,8 +52,8 @@ impl Weapon for Sword {
 
     fn get_name(&self) -> String { self.name.clone() }
     
-    fn deal_damage(&self) -> u16 {
-        let max = self.base_damage + num::pow(56u8 % 10u8, 2);
+    fn deal_damage(&self, enemy: &Box<Actor>) -> u16 {
+        let max = self.base_damage + num::pow(enemy.health % 10u8, 2);
         let mut rng = rand::task_rng();
         Range::new(0u8, max).ind_sample(&mut rng) as u16
     }

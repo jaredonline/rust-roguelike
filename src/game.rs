@@ -124,22 +124,22 @@ impl Game {
                 match ks.key {
                     Printable('/') => {
                         let w : Box<Sword> = box Weapon::new();
-                        let mut is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
+                        let is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
                         self.game_state = is as Box<GameState>;
                     },
                     Printable('^') => {
                         let w : Box<Boomerang> = box Weapon::new();
-                        let mut is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
+                        let is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
                         self.game_state = is as Box<GameState>;
                     },
                     Printable('*') => {
                         let w : Box<Boomerang> = box Weapon::new();
-                        let mut is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
+                        let is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
                         self.game_state = is as Box<GameState>;
                     },
                     Printable('%') => {
                         let w : Box<Boomerang> = box Weapon::new();
-                        let mut is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
+                        let is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
                         self.game_state = is as Box<GameState>;
                     },
                     _ => {

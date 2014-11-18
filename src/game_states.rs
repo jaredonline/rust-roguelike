@@ -145,11 +145,11 @@ impl GameState for AttackInputGameState {
 
                 if self.should_update_state {
                     match maps.enemy_at(point) {
-                        Some(_) => {
+                        Some(enemy) => {
                             msg.push_str(" with your ");
                             msg.push_str(self.weapon.get_name().as_slice());
                             msg.push_str(" for ");
-                            msg.push_str(self.weapon.deal_damage().to_string().as_slice());
+                            msg.push_str(self.weapon.deal_damage(enemy).to_string().as_slice());
                             msg.push_str(" points of damage!");
                             windows.messages.buffer_message(msg.as_slice());
                         },
