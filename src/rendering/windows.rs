@@ -1,5 +1,5 @@
 extern crate tcod;
-use self::tcod::{Console, background_flag,};
+use self::tcod::{Console, BackgroundFlag,};
 
 use util::{Bound};
 
@@ -72,7 +72,7 @@ pub trait WindowComponent {
 
     fn print_message(&mut self, x: int, y: int, alignment: tcod::TextAlignment, text: &str) {
         let console = self.get_console();
-        console.print_ex(x, y, background_flag::Set, alignment, text);
+        console.print_ex(x, y, BackgroundFlag::Set, alignment, text);
     }
 
     fn buffer_message(&mut self, text: &str) {

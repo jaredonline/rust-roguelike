@@ -6,14 +6,11 @@ use util::{Point, Bound};
 
 use rendering::windows::WindowComponent;
 
-pub type Color = self::Color::Color;
-pub mod Color {
-    pub enum Color {
-        Red,
-        Blue,
-        Black,
-        White
-    }
+pub enum Color {
+    Red,
+    Blue,
+    Black,
+    White
 }
 
 pub trait RenderingComponent {

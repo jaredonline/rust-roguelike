@@ -40,29 +40,29 @@ impl Point {
 
     pub fn compare_x(&self, point: Point) -> XPointRelation {
         if self.x > point.x {
-            RightOfPoint
+            XPointRelation::RightOfPoint
         } else if self.x < point.x {
-            LeftOfPoint
+            XPointRelation::LeftOfPoint
         } else {
-            OnPointX
+            XPointRelation::OnPointX
         }
     }
 
     pub fn compare_y(&self, point: Point) -> YPointRelation {
         if self.y > point.y {
-            BelowPoint
+            YPointRelation::BelowPoint
         } else if self.y < point.y {
-            AbovePoint
+            YPointRelation::AbovePoint
         } else {
-            OnPointY
+            YPointRelation::OnPointY
         }
     }
 
     pub fn compare(&self, point: Point) -> PointEquality {
         if self.x == point.x && self.y == point.y {
-            PointsEqual
+            PointEquality::PointsEqual
         } else {
-            PointsNotEqual
+            PointEquality::PointsNotEqual
         }
     }
 }
@@ -93,9 +93,9 @@ impl Bound {
             point.y >= self.min.y &&
             point.y <  self.max.y
         {
-            DoesContain
+            Contains::DoesContain
         } else {
-            DoesNotContain
+            Contains::DoesNotContain
         }
     }
 }

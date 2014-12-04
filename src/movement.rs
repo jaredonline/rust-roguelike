@@ -1,18 +1,27 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use input::{SpecialKey, KeyCode};
+use input::Key::{SpecialKey,};
+use input::{KeyCode};
 use game::MoveInfo;
 use util::{
     Point,
+};
+use util::Contains::{
     DoesContain,
     DoesNotContain,
+};
+use util::XPointRelation::{
     LeftOfPoint,
     RightOfPoint,
     OnPointX,
+};
+use util::YPointRelation::{
     AbovePoint,
     BelowPoint,
     OnPointY,
+};
+use util::PointEquality::{
     PointsEqual,
     PointsNotEqual
 };

@@ -1,29 +1,26 @@
 #![allow(non_snake_case)]
 extern crate tcod;
 
-use self::tcod::{key_code, KeyState};
+use self::tcod::{KeyState};
 
 pub enum Key {
     Printable(char),
     SpecialKey(KeyCode)
 }
 
-pub type KeyCode = self::KeyCode::KeyCode;
-pub mod KeyCode {
-    pub enum KeyCode {
-        // Arrow keys
-        Up,
-        Down,
-        Left,
-        Right,
+pub enum KeyCode {
+    // Arrow keys
+    Up,
+    Down,
+    Left,
+    Right,
 
-        // Special
-        Shift,
-        Escape,
+    // Special
+    Shift,
+    Escape,
 
-        // Default
-        None
-    }
+    // Default
+    None
 }
 
 pub struct KeyboardInput {
@@ -43,21 +40,21 @@ impl InputComponent<KeyState> for TcodInputComponent {
     fn translate_input(&self, key_state: KeyState) -> KeyboardInput {
         let key : Key = if key_state.shift {
             match key_state.key {
-                self::tcod::Special(key_code::Number5) => Printable('%'),
-                self::tcod::Special(key_code::Number6) => Printable('^'),
-                self::tcod::Special(key_code::Number8) => Printable('*'),
-                _                                      => SpecialKey(KeyCode::None)
+                self::tcod::Special(tcod::KeyCode::Number5) => Key::Printable('%'),
+                self::tcod::Special(tcod::KeyCode::Number6) => Key::Printable('^'),
+                self::tcod::Special(tcod::KeyCode::Number8) => Key::Printable('*'),
+                _                                           => Key::SpecialKey(KeyCode::None)
             }
         } else {
             match key_state.key {
-                self::tcod::Printable('/')            => Printable('/'),
-                self::tcod::Special(key_code::Up)     => SpecialKey(KeyCode::Up),
-                self::tcod::Special(key_code::Down)   => SpecialKey(KeyCode::Down),
-                self::tcod::Special(key_code::Left)   => SpecialKey(KeyCode::Left),
-                self::tcod::Special(key_code::Right)  => SpecialKey(KeyCode::Right),
-                self::tcod::Special(key_code::Shift)  => SpecialKey(KeyCode::Shift),
-                self::tcod::Special(key_code::Escape) => SpecialKey(KeyCode::Escape),
-                _                                     => SpecialKey(KeyCode::None)
+                self::tcod::Printable('/')                 => Key::Printable('/'),
+                self::tcod::Special(tcod::KeyCode::Up)     => Key::SpecialKey(KeyCode::Up),
+                self::tcod::Special(tcod::KeyCode::Down)   => Key::SpecialKey(KeyCode::Down),
+                self::tcod::Special(tcod::KeyCode::Left)   => Key::SpecialKey(KeyCode::Left),
+                self::tcod::Special(tcod::KeyCode::Right)  => Key::SpecialKey(KeyCode::Right),
+                self::tcod::Special(tcod::KeyCode::Shift)  => Key::SpecialKey(KeyCode::Shift),
+                self::tcod::Special(tcod::KeyCode::Escape) => Key::SpecialKey(KeyCode::Escape),
+                _                                          => Key::SpecialKey(KeyCode::None)
             }
         };
 

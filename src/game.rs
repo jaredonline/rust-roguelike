@@ -13,7 +13,8 @@ use rendering::windows::{
     TcodMapWindowComponent,
     TcodMessagesWindowComponent
 };
-use input::{KeyboardInput, Printable,};
+use input::{KeyboardInput,};
+use input::Key::{Printable,};
 use map::Maps;
 use game_states::{
     GameState,
@@ -27,6 +28,7 @@ use combat::{
     Sword,
     Bomb
 };
+use actor::Actor;
 
 pub struct MoveInfo {
     pub last_keypress: Option<KeyboardInput>,
@@ -79,7 +81,16 @@ impl Game {
         let gs : Box<MovementGameState> = box GameState::new();
 
         let move_info = Rc::new(RefCell::new(MoveInfo::new(map_bounds)));
-        let maps = Maps::new(move_info.clone());
+        let mut maps = Maps::new(move_info.clone());
+
+        maps.friends.push_actor(Point::new(10, 10), box Actor::dog(10, 10, move_info.clone()));
+        maps.friends.push_actor(Point::new(40, 25), box Actor::cat(40, 25, move_info.clone()));
+        maps.enemies.push_actor(Point::new(20, 20), box Actor::kobold(20, 20, move_info.clone()));
+
+        let char_location = {
+            move_info.borrow().deref().char_location
+        };
+        maps.pcs.push_actor(char_location, box Actor::heroine(move_info.clone()));
 
         Game {
             exit:                false,

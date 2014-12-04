@@ -5,7 +5,8 @@ use rendering::windows::Windows;
 use rendering::renderers::RenderingComponent;
 use map::Maps;
 use game::MoveInfo;
-use input::{KeyCode, SpecialKey};
+use input::{KeyCode,};
+use input::Key::{SpecialKey};
 use combat::{Weapon, Boomerang};
 
 pub trait GameState {
