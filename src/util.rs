@@ -15,7 +15,7 @@ pub enum PointEquality {
     PointsNotEqual
 }
 
-#[deriving(Clone, Show)]
+#[deriving(Clone, Show, PartialEq, Eq)]
 pub struct Point {
     pub x: i32,
     pub y: i32

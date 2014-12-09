@@ -2,17 +2,11 @@
 name = "dwemthys"
 version = "0.0.1"
 dependencies = [
- "stainless 0.0.3 (git+https://github.com/reem/stainless.git)",
- "tcod 0.2.0 (git+https://github.com/tomassedovic/tcod-rs.git)",
+ "tcod 0.3.0 (git+https://github.com/tomassedovic/tcod-rs.git)",
 ]
 
 [[package]]
-name = "stainless"
-version = "0.0.3"
-source = "git+https://github.com/reem/stainless.git#b71852ae7353d2f5575bceaa7358fa7f3bb30b46"
-
-[[package]]
 name = "tcod"
-version = "0.2.0"
-source = "git+https://github.com/tomassedovic/tcod-rs.git#0f51d5dba0deeca29c3b9e2a24a447051dd63466"
+version = "0.3.0"
+source = "git+https://github.com/tomassedovic/tcod-rs.git#73b0eef9531db03ce170f1994395cda2cc9f6e69"
 

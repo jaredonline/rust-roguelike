@@ -9,5 +9,5 @@ build = "sh .build.sh"
 [dependencies.tcod]
 git = "https://github.com/tomassedovic/tcod-rs.git"
 
-[dependencies.stainless]
-git = "https://github.com/reem/stainless.git"
+#[dependencies.stainless]
+#git = "https://github.com/reem/stainless.git"

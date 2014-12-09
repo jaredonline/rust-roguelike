@@ -56,7 +56,7 @@ impl RenderingComponent for TcodRenderingComponent {
         let messages = window.get_messages();
 
         for message in messages.iter() {
-            window.print_message(0, line, tcod::Left, message.as_slice());
+            window.print_message(0, line, tcod::TextAlignment::Left, message.as_slice());
             line = line + 1;
         }
 

@@ -2,7 +2,7 @@ extern crate tcod;
 extern crate dwemthys;
 
 use dwemthys::game::Game;
-use dwemthys::input::{SpecialKey, KeyCode};
+use dwemthys::input::{Key, KeyCode};
 use tcod::Console;
 
 #[cfg(not(test))]
@@ -16,8 +16,8 @@ fn main() {
 
         // update game state
         match keypress.key {
-            SpecialKey(KeyCode::Escape) => game.exit = true,
-            _                           => {}
+            Key::SpecialKey(KeyCode::Escape) => game.exit = true,
+            _                                => {}
         }
         game.update();
 
