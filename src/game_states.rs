@@ -1,3 +1,5 @@
+extern crate core;
+
 use std::rc::Rc;
 use std::cell::RefCell;
 
@@ -8,11 +10,11 @@ use game::MoveInfo;
 use input::{KeyCode,};
 use input::Key::{SpecialKey};
 use combat::{Weapon, Boomerang};
+use util::Point;
+
+use self::core::ops::Deref;
 
 pub trait GameState {
-    fn new() -> Self;
-    fn new_with_weapon(Box<Weapon + 'static>) -> Self;
-
     fn enter(&self, &mut Windows) {}
     fn exit(&self)  {}
 
@@ -39,15 +41,13 @@ pub trait GameState {
 
 pub struct MovementGameState;
 
+impl MovementGameState {
+    pub fn new() -> MovementGameState {
+        MovementGameState
+    }
+}
+
 impl GameState for MovementGameState {
-    fn new() -> MovementGameState {
-        MovementGameState
-    }
-
-    fn new_with_weapon(_: Box<Weapon>) -> MovementGameState {
-        MovementGameState
-    }
-
     fn should_update_state(&self) -> bool {
         true
     }
@@ -67,9 +67,7 @@ impl GameState for MovementGameState {
                     // anything when it's pushed. We can check for shift when we
                     // process the next keypress
                     SpecialKey(KeyCode::Shift) => {},
-                    _ => {
-                        maps.update(windows);
-                    }
+                    _                          => { maps.update(windows); }
                 }
             },
             _    => {}
@@ -82,22 +80,24 @@ pub struct AttackInputGameState {
     pub weapon: Box<Weapon + 'static>
 }
 
+impl AttackInputGameState {
+    pub fn new() -> AttackInputGameState {
+        let weapon = Box::new(Boomerang::new());
+        AttackInputGameState {
+            should_update_state: false,
+            weapon: weapon
+        }
+    }
+
+    pub fn new_with_weapon(weapon: Box<Weapon + 'static>) -> AttackInputGameState {
+        AttackInputGameState {
+            should_update_state: false,
+            weapon: weapon
+        }
+    }
+}
+
 impl GameState for AttackInputGameState {
-    fn new() -> AttackInputGameState {
-        let weapon : Box<Boomerang> = box Weapon::new();
-        AttackInputGameState {
-            should_update_state: false,
-            weapon: weapon
-        }
-    }
-
-    fn new_with_weapon(weapon: Box<Weapon + 'static>) -> AttackInputGameState {
-        AttackInputGameState {
-            should_update_state: false,
-            weapon: weapon
-        }
-    }
-
     fn should_update_state(&self) -> bool {
         self.should_update_state
     }
@@ -117,27 +117,28 @@ impl GameState for AttackInputGameState {
         match last_keypress {
             Some(ks) => {
                 let mut msg = "You attack ".to_string();
-                let mut point = {
+                let char_point = {
                     move_info.borrow().deref().char_location.clone()
                 };
+                let mut point = Point::new(0, 0);
                 match ks.key {
                     SpecialKey(KeyCode::Up) => {
-                        point = point.offset_y(-1);
+                        point = char_point.offset_y(-1);
                         msg.push_str("up");
                         self.should_update_state = true;
                     },
                     SpecialKey(KeyCode::Down) => {
-                        point = point.offset_y(1);
+                        point = char_point.offset_y(1);
                         msg.push_str("down");
                         self.should_update_state = true;
                     },
                     SpecialKey(KeyCode::Left) => {
-                        point = point.offset_x(-1);
+                        point = char_point.offset_x(-1);
                         msg.push_str("left");
                         self.should_update_state = true;
                     },
                     SpecialKey(KeyCode::Right) => {
-                        point = point.offset_x(1);
+                        point = char_point.offset_x(1);
                         msg.push_str("right");
                         self.should_update_state = true;
                     },
@@ -147,6 +148,8 @@ impl GameState for AttackInputGameState {
                 if self.should_update_state {
                     match maps.enemy_at(point) {
                         Some(enemy) => {
+                            let pc = maps.pcs.actor_at(char_point).unwrap();
+                            println!("{}", pc.display_char);
                             msg.push_str(" with your ");
                             msg.push_str(self.weapon.get_name().as_slice());
                             msg.push_str(" for ");

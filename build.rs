@@ -1,9 +1,9 @@
-use std::io::Command;
-use std::os;
+use std::process::Command;
+use std::env;
 
 fn main() {
     println!("foo bar");
-    let out_dir = os::getenv("OUT_DIR").unwrap();
+    let out_dir = env::var("OUT_DIR").unwrap();
     let libtcod_src_dir = "/Users/jmcfarland/src/libtcod";
 
     let args = &[

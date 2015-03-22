@@ -1,4 +1,5 @@
 #![feature(macro_rules)]
+#![feature(int_uint)]
 
 pub mod util;
 pub mod game;

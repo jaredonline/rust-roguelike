@@ -1,3 +1,5 @@
+extern crate core;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -6,6 +8,8 @@ use game::MoveInfo;
 use rendering::renderers::{Color};
 use rendering::windows::Windows;
 use movement::{AggroMovementComponent, RandomMovementComponent, UserMovementComponent, MovementComponent};
+
+use self::core::ops::Deref;
 
 pub struct Actor {
     pub position:     Point,
@@ -38,12 +42,12 @@ impl Actor {
     }
 
     pub fn dog(x: i32, y: i32, move_info: Rc<RefCell<MoveInfo>>) -> Actor {
-        let mc : Box<RandomMovementComponent> = box MovementComponent::new(move_info);
+        let mc = Box::new(RandomMovementComponent::new(move_info));
         Actor::new(x, y, 'd', mc, false, Color::White, Color::Black, 20u8)
     }
 
     pub fn cat(x: i32, y: i32, move_info: Rc<RefCell<MoveInfo>>) -> Actor {
-        let mc : Box<RandomMovementComponent> = box MovementComponent::new(move_info);
+        let mc = Box::new(RandomMovementComponent::new(move_info));
         Actor::new(x, y, 'c', mc, false, Color::White, Color::Black, 20u8)
     }
 
@@ -51,12 +55,12 @@ impl Actor {
         let point = {
             move_info.borrow().deref().char_location
         };
-        let mc : Box<UserMovementComponent> = box MovementComponent::new(move_info);
+        let mc = Box::new(UserMovementComponent::new(move_info));
         Actor::new(point.x, point.y, '@', mc, true, Color::Blue, Color::Black, 20u8)
     }
 
     pub fn kobold(x: i32, y: i32, move_info: Rc<RefCell<MoveInfo>>) -> Actor {
-        let mc : Box<AggroMovementComponent> = box MovementComponent::new(move_info);
+        let mc = Box::new(AggroMovementComponent::new(move_info));
         Actor::new(x, y, 'k', mc, false, Color::Red, Color::Black, 20u8)
     }
 

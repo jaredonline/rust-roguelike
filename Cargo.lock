@@ -2,11 +2,45 @@
 name = "dwemthys"
 version = "0.0.1"
 dependencies = [
- "tcod 0.3.0 (git+https://github.com/tomassedovic/tcod-rs.git)",
+ "rand 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tcod 0.5.0 (git+https://github.com/tomassedovic/tcod-rs.git)",
+]
+
+[[package]]
+name = "bitflags"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "libc"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "log"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "rand"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "tcod"
-version = "0.3.0"
-source = "git+https://github.com/tomassedovic/tcod-rs.git#73b0eef9531db03ce170f1994395cda2cc9f6e69"
+version = "0.5.0"
+source = "git+https://github.com/tomassedovic/tcod-rs.git#3d808e7fd063da0e7f620520518f1a826370b719"
+dependencies = [
+ "bitflags 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tcod-sys 2.0.5 (git+https://github.com/tomassedovic/tcod-rs.git)",
+]
+
+[[package]]
+name = "tcod-sys"
+version = "2.0.5"
+source = "git+https://github.com/tomassedovic/tcod-rs.git#3d808e7fd063da0e7f620520518f1a826370b719"
 

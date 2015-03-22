@@ -15,7 +15,7 @@ pub enum PointEquality {
     PointsNotEqual
 }
 
-#[deriving(Clone, Show, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Point {
     pub x: i32,
     pub y: i32
@@ -72,7 +72,7 @@ pub enum Contains {
     DoesNotContain
 }
 
-#[deriving(Clone, Show)]
+#[derive(Clone, Debug)]
 pub struct Bound {
     pub min: Point,
     pub max: Point

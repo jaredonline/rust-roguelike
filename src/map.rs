@@ -1,3 +1,5 @@
+extern crate core;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -6,6 +8,8 @@ use util::{Bound, Point,};
 use rendering::windows::Windows;
 use rendering::renderers::RenderingComponent;
 use game::MoveInfo;
+
+use self::core::ops::{Deref, DerefMut};
 
 pub struct Maps {
     pub terrain: Box<Map>,
@@ -16,10 +20,10 @@ pub struct Maps {
 
 impl Maps {
     pub fn new(move_info: Rc<RefCell<MoveInfo>>) -> Maps {
-        let terrain = box Map::new(move_info.clone());
-        let enemies = box Map::new(move_info.clone());
-        let friends = box Map::new(move_info.clone());
-        let pcs     = box Map::new(move_info.clone());
+        let terrain = Box::new(Map::new(move_info.clone()));
+        let enemies = Box::new(Map::new(move_info.clone()));
+        let friends = Box::new(Map::new(move_info.clone()));
+        let pcs     = Box::new(Map::new(move_info.clone()));
 
         Maps {
             friends: friends,
@@ -44,7 +48,7 @@ impl Maps {
     }
 
     pub fn enemy_at(&self, point: Point) -> Option<&Box<Actor>> {
-        let enemies_at_point = &self.enemies.content[point.x as uint][point.y as uint];
+        let enemies_at_point = &self.enemies.content[point.x as usize][point.y as usize];
         if enemies_at_point.len() > 0 {
             Some(&enemies_at_point[0])
         } else {
@@ -87,7 +91,16 @@ impl Map {
     }
 
     pub fn push_actor(&mut self, point: Point, actor: Box<Actor>) {
-        self.content[point.x as uint][point.y as uint].push(actor);
+        self.content[point.x as usize][point.y as usize].push(actor);
+    }
+
+    pub fn actor_at(&self, point: Point) -> Option<&Box<Actor>> {
+        let ref location = self.content[point.x as usize][point.y as usize];
+        if location.len() > 0 {
+            Some(&location[0])
+        } else {
+            None
+        }
     }
 
     pub fn update(&mut self, windows: &mut Windows) {
@@ -101,7 +114,7 @@ impl Map {
                     }
                     let point = actor.position;
                     let new_actor = actor.clone();
-                    new_content[point.x as uint][point.y as uint].push(new_actor);
+                    new_content[point.x as usize][point.y as usize].push(new_actor);
                 }
             }
         }

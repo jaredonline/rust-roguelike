@@ -14,7 +14,6 @@ pub enum Color {
 }
 
 pub trait RenderingComponent {
-    fn new(Bound) -> Self;
     fn before_render_new_frame(&mut self);
     fn render_object(&mut self, Point, char, Color, Color);
     fn after_render_new_frame(&mut self);
@@ -29,29 +28,31 @@ pub struct TcodRenderingComponent {
     pub input_component: Box<InputComponent<KeyState> + 'static>
 }
 
-impl RenderingComponent for TcodRenderingComponent {
-    fn new(bounds: Bound) -> TcodRenderingComponent {
+impl TcodRenderingComponent {
+    pub fn new(bounds: Bound) -> TcodRenderingComponent {
         let console = Console::init_root(
-            (bounds.max.x + 1) as int,
-            (bounds.max.y + 1) as int,
+            (bounds.max.x + 1) as i32,
+            (bounds.max.y + 1) as i32,
             "libtcod Rust tutorial", false
         );
 
-        let ic : Box<TcodInputComponent> = box InputComponent::new();
+        let ic = Box::new(TcodInputComponent::new());
 
         TcodRenderingComponent {
             console: console,
             input_component: ic
         }
     }
+}
 
+impl RenderingComponent for TcodRenderingComponent {
     fn before_render_new_frame(&mut self) {
         self.console.clear();
     }
     
     fn attach_window(&mut self, window: &mut Box<WindowComponent>) {
         window.clear();
-        let mut line = 0i;
+        let mut line = 0i32;
         let bounds   = window.get_bounds();
         let messages = window.get_messages();
 
@@ -62,13 +63,13 @@ impl RenderingComponent for TcodRenderingComponent {
 
         let console  = window.get_console();
 
-        Console::blit(&*console, 0, 0, (bounds.max.x as int) + 1, (bounds.max.y as int) + 1, &mut self.console, bounds.min.x as int, bounds.min.y as int, 1f32, 1f32);
+        Console::blit(&*console, 0, 0, (bounds.max.x as i32) + 1, (bounds.max.y as i32) + 1, &mut self.console, bounds.min.x as i32, bounds.min.y as i32, 1f32, 1f32);
     }
 
     fn render_object(&mut self, position: Point, symbol: char, foreground: Color, background: Color) {
         let f = self.translate_color(foreground);
         let b = self.translate_color(background);
-        self.console.put_char_ex(position.x as int, position.y as int, symbol, f, b);
+        self.console.put_char_ex(position.x as i32, position.y as i32, symbol, f, b);
     }
 
     fn after_render_new_frame(&mut self) {

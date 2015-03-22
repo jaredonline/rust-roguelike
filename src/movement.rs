@@ -1,3 +1,6 @@
+extern crate rand;
+extern crate core;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -27,11 +30,10 @@ use util::PointEquality::{
 };
 use rendering::windows::Windows;
 
-use std;
-use std::rand::Rng;
+use self::rand::Rng;
+use self::core::ops::Deref;
 
 pub trait MovementComponent {
-    fn new(Rc<RefCell<MoveInfo>>) -> Self;
     fn update(&self, Point, &mut Windows) -> Point;
     fn box_clone(&self) -> Box<MovementComponent + 'static>;
 }
@@ -40,13 +42,15 @@ pub struct AggroMovementComponent {
     move_info: Rc<RefCell<MoveInfo>>
 }
 
-impl MovementComponent for AggroMovementComponent {
-    fn new(move_info: Rc<RefCell<MoveInfo>>) -> AggroMovementComponent {
+impl AggroMovementComponent {
+    pub fn new(move_info: Rc<RefCell<MoveInfo>>) -> AggroMovementComponent {
         AggroMovementComponent { move_info: move_info }
     }
+}
 
+impl MovementComponent for AggroMovementComponent {
     fn box_clone(&self) -> Box<MovementComponent + 'static> {
-        box AggroMovementComponent { move_info: self.move_info.clone() }
+        Box::new(AggroMovementComponent { move_info: self.move_info.clone() })
     }
 
     fn update(&self, point: Point, _: &mut Windows) -> Point {
@@ -85,13 +89,15 @@ pub struct UserMovementComponent {
     move_info: Rc<RefCell<MoveInfo>>
 }
 
-impl MovementComponent for UserMovementComponent {
-    fn new(move_info: Rc<RefCell<MoveInfo>>) -> UserMovementComponent {
+impl UserMovementComponent {
+    pub fn new(move_info: Rc<RefCell<MoveInfo>>) -> UserMovementComponent {
         UserMovementComponent { move_info: move_info }
     }
+}
 
+impl MovementComponent for UserMovementComponent {
     fn box_clone(&self) -> Box<MovementComponent + 'static> {
-        box UserMovementComponent { move_info: self.move_info.clone() }
+        Box::new(UserMovementComponent { move_info: self.move_info.clone() })
     }
 
     fn update(&self, point: Point, windows: &mut Windows) -> Point {
@@ -139,18 +145,20 @@ pub struct RandomMovementComponent {
     move_info: Rc<RefCell<MoveInfo>>
 }
 
-impl MovementComponent for RandomMovementComponent {
-    fn new(move_info: Rc<RefCell<MoveInfo>>) -> RandomMovementComponent {
+impl RandomMovementComponent {
+    pub fn new(move_info: Rc<RefCell<MoveInfo>>) -> RandomMovementComponent {
         RandomMovementComponent { move_info: move_info }
     }
+}
 
+impl MovementComponent for RandomMovementComponent {
     fn box_clone(&self) -> Box<MovementComponent + 'static> {
-        box RandomMovementComponent { move_info: self.move_info.clone() }
+        Box::new(RandomMovementComponent { move_info: self.move_info.clone() })
     }
 
     fn update(&self, point: Point, _: &mut Windows) -> Point {
         let mut offset = Point { x: point.x, y: point.y };
-        let offset_x = std::rand::task_rng().gen_range(0, 3i32) - 1;
+        let offset_x = self::rand::thread_rng().gen_range(0, 3i32) - 1;
         let bound = {
             self.move_info.borrow().deref().bounds
         };
@@ -159,7 +167,7 @@ impl MovementComponent for RandomMovementComponent {
             DoesNotContain => { return point; }
         }
 
-        let offset_y = std::rand::task_rng().gen_range(0, 3i32) - 1;
+        let offset_y = self::rand::thread_rng().gen_range(0, 3i32) - 1;
         let bound = {
             self.move_info.borrow().deref().bounds
         };

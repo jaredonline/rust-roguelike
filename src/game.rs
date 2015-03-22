@@ -1,4 +1,5 @@
 extern crate tcod;
+extern crate core;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -29,6 +30,8 @@ use combat::{
     Bomb
 };
 use actor::Actor;
+
+use self::core::ops::{Deref, DerefMut};
 
 pub struct MoveInfo {
     pub last_keypress: Option<KeyboardInput>,
@@ -64,12 +67,12 @@ impl Game {
         let message_bounds = Bound::new(0, 52, 99, 61);
         let map_bounds     = Bound::new(0,  0, 78, 49);
 
-        let rc  : Box<TcodRenderingComponent>      = box RenderingComponent::new(total_bounds);
+        let rc = Box::new(TcodRenderingComponent::new(total_bounds));
 
-        let sw  : Box<TcodStatsWindowComponent>    = box WindowComponent::new(stats_bounds);
-        let iw  : Box<TcodInputWindowComponent>    = box WindowComponent::new(input_bounds);
-        let mw  : Box<TcodMessagesWindowComponent> = box WindowComponent::new(message_bounds);
-        let maw : Box<TcodMapWindowComponent>      = box WindowComponent::new(map_bounds);
+        let sw  = Box::new(TcodStatsWindowComponent::new(stats_bounds));
+        let iw  = Box::new(TcodInputWindowComponent::new(input_bounds));
+        let mw  = Box::new(TcodMessagesWindowComponent::new(message_bounds));
+        let maw = Box::new(TcodMapWindowComponent::new(map_bounds));
 
         let windows = Windows {
             input:    iw,
@@ -78,19 +81,19 @@ impl Game {
             stats:    sw
         };
 
-        let gs : Box<MovementGameState> = box GameState::new();
+        let gs = Box::new(MovementGameState::new());
 
         let move_info = Rc::new(RefCell::new(MoveInfo::new(map_bounds)));
         let mut maps = Maps::new(move_info.clone());
 
-        maps.friends.push_actor(Point::new(10, 10), box Actor::dog(10, 10, move_info.clone()));
-        maps.friends.push_actor(Point::new(40, 25), box Actor::cat(40, 25, move_info.clone()));
-        maps.enemies.push_actor(Point::new(20, 20), box Actor::kobold(20, 20, move_info.clone()));
+        maps.friends.push_actor(Point::new(10, 10), Box::new(Actor::dog(10, 10, move_info.clone())));
+        maps.friends.push_actor(Point::new(40, 25), Box::new(Actor::cat(40, 25, move_info.clone())));
+        maps.enemies.push_actor(Point::new(20, 20), Box::new(Actor::kobold(20, 20, move_info.clone())));
 
         let char_location = {
             move_info.borrow().deref().char_location
         };
-        maps.pcs.push_actor(char_location, box Actor::heroine(move_info.clone()));
+        maps.pcs.push_actor(char_location, Box::new(Actor::heroine(move_info.clone())));
 
         Game {
             exit:                false,
@@ -104,7 +107,8 @@ impl Game {
     }
 
     pub fn render(&mut self) {
-        self.game_state.render(&mut self.rendering_component, &mut self.maps, &mut self.windows);
+        let ref mut render_component = self.rendering_component;
+        self.game_state.render(render_component, &mut self.maps, &mut self.windows);
     }
 
     pub fn update(&mut self) {
@@ -134,28 +138,28 @@ impl Game {
             Some(ks) => {
                 match ks.key {
                     Printable('/') => {
-                        let w : Box<Sword> = box Weapon::new();
-                        let is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
-                        self.game_state = is as Box<GameState>;
+                        let w = Box::new(Sword::new());
+                        let is = Box::new(AttackInputGameState::new_with_weapon(w));
+                        self.game_state = is;
                     },
                     Printable('^') => {
-                        let w : Box<Boomerang> = box Weapon::new();
-                        let is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
-                        self.game_state = is as Box<GameState>;
+                        let w = Box::new(Boomerang::new());
+                        let is = Box::new(AttackInputGameState::new_with_weapon(w));
+                        self.game_state = is;
                     },
                     Printable('*') => {
-                        let w : Box<Boomerang> = box Weapon::new();
-                        let is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
-                        self.game_state = is as Box<GameState>;
+                        let w = Box::new(Boomerang::new());
+                        let is = Box::new(AttackInputGameState::new_with_weapon(w));
+                        self.game_state = is;
                     },
                     Printable('%') => {
-                        let w : Box<Boomerang> = box Weapon::new();
-                        let is : Box<AttackInputGameState> = box GameState::new_with_weapon(w);
-                        self.game_state = is as Box<GameState>;
+                        let w = Box::new(Boomerang::new());
+                        let is = Box::new(AttackInputGameState::new_with_weapon(w));
+                        self.game_state = is;
                     },
                     _ => {
-                        let ms : Box<MovementGameState> = box GameState::new();
-                        self.game_state = ms as Box<GameState>;
+                        let ms = Box::new(MovementGameState::new());
+                        self.game_state = ms;
                     }
                 }
             },

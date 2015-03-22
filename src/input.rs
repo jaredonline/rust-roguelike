@@ -28,15 +28,16 @@ pub struct KeyboardInput {
 }
 
 pub trait InputComponent<T> {
-    fn new() -> Self;
     fn translate_input(&self, T) -> KeyboardInput;
 }
 
 pub struct TcodInputComponent;
 
-impl InputComponent<KeyState> for TcodInputComponent {
-    fn new() -> TcodInputComponent { TcodInputComponent }
+impl TcodInputComponent {
+    pub fn new() -> TcodInputComponent { TcodInputComponent }
+}
 
+impl InputComponent<KeyState> for TcodInputComponent {
     fn translate_input(&self, key_state: KeyState) -> KeyboardInput {
         let key : Key = if key_state.shift {
             match key_state.key {

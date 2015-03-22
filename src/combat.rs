@@ -1,11 +1,13 @@
+extern crate rand;
+extern crate core;
+
 use std::num;
-use std::rand;
-use std::rand::distributions::{IndependentSample, Range};
+use self::rand::distributions::{IndependentSample, Range};
 
 use actor::Actor;
+use self::core::ops::Deref;
 
 pub trait Weapon {
-    fn new() -> Self;
     fn get_name(&self) -> String;
     fn deal_damage(&self, &Box<Actor>) -> u16;
 }
@@ -15,14 +17,16 @@ pub struct Boomerang {
     base_damage: u8
 }
 
-impl Weapon for Boomerang {
-    fn new() -> Boomerang {
+impl Boomerang {
+    pub fn new() -> Boomerang {
         Boomerang {
             name: String::from_str("Little Boomerang"),
             base_damage: 13
         }
     }
+}
 
+impl Weapon for Boomerang {
     fn get_name(&self) -> String {
         self.name.clone()
     }
@@ -42,19 +46,22 @@ pub struct Sword {
     base_damage: u8
 }
 
-impl Weapon for Sword {
-    fn new() -> Sword {
+impl Sword {
+    pub fn new() -> Sword {
         Sword {
             name: String::from_str("Heroic Sworc"),
             base_damage: 4
         }
     }
+}
 
+impl Weapon for Sword {
     fn get_name(&self) -> String { self.name.clone() }
     
     fn deal_damage(&self, enemy: &Box<Actor>) -> u16 {
-        let max = self.base_damage + num::pow(enemy.health % 10u8, 2);
-        let mut rng = rand::task_rng();
+        let x   = enemy.health % 10u8;
+        let max = self.base_damage + (x * x);
+        let mut rng = rand::thread_rng();
         Range::new(0u8, max).ind_sample(&mut rng) as u16
     }
 }
