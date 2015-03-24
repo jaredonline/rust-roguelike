@@ -1,11 +1,7 @@
-extern crate tcod;
-
-use self::tcod::{Console, BackgroundFlag};
-
 use std::sync::{Arc, RwLock, Mutex};
 
-use movement::{MovementComponent, RandomMovementComponent, UserMovementComponent};
-use game::Game;
+use movement::{MovementComponent, AggroMovementComponent, RandomMovementComponent, UserMovementComponent};
+use game::{GameInfo};
 use util::Point;
 
 pub struct Actor {
@@ -13,6 +9,8 @@ pub struct Actor {
     pub display_char: char,
     pub movement:     Box<MovementComponent + 'static>
 }
+pub type SafeActor = Arc<Mutex<Actor>>;
+pub type Actors    = Vec<SafeActor>;
 
 unsafe impl Send for Actor {}
 
@@ -28,25 +26,31 @@ impl Actor {
         }
     }
 
-    pub fn mutex(x: i32, y: i32, c: char, mc: Box<MovementComponent>) -> Arc<Mutex<Actor>> {
+    pub fn mutex(x: i32, y: i32, c: char, mc: Box<MovementComponent>) -> SafeActor {
         Arc::new(Mutex::new(Actor::new(x, y, c, mc)))
     }
 
-    pub fn heroine() -> Arc<Mutex<Actor>> {
+    pub fn heroine() -> SafeActor {
         let mc = Box::new(UserMovementComponent::new());
         Actor::mutex(40, 25, '@', mc)
     }
 
-    pub fn dog() -> Arc<Mutex<Actor>> {
+    pub fn dog() -> SafeActor {
         let mc = Box::new(RandomMovementComponent::new());
         Actor::mutex(10, 10, 'd', mc)
     }
 
-    pub fn render(&self, console: &mut Console) {
-        console.put_char(self.position.x, self.position.y, self.display_char, BackgroundFlag::Set);
+    pub fn cat() -> SafeActor {
+        let mc = Box::new(RandomMovementComponent::new());
+        Actor::mutex(40, 25, 'c', mc)
     }
 
-    pub fn update(&mut self, game: Arc<RwLock<Game>>) {
+    pub fn kobold() -> SafeActor {
+        let mc = Box::new(AggroMovementComponent::new());
+        Actor::mutex(20, 20, 'k', mc)
+    }
+
+    pub fn update(&mut self, game: Arc<RwLock<GameInfo>>) {
         let point = self.movement.update(&self.position, game);
         self.position = point;
     }

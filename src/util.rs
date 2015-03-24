@@ -1,6 +1,24 @@
+#[derive(Clone)]
 pub struct Point {
     pub x: i32,
     pub y: i32
+}
+
+pub enum XRelation {
+    Left,
+    Right,
+    On
+}
+
+pub enum YRelation {
+    Above,
+    Below,
+    On
+}
+
+pub enum PointEquality {
+    Equal,
+    NotEqual
 }
 
 impl Point {
@@ -14,6 +32,34 @@ impl Point {
 
     pub fn offset(&self, offset: &Point) -> Point {
         Point { x: self.x + offset.x, y: self.y + offset.y }
+    }
+
+    pub fn compare_x(&self, point: &Point) -> XRelation {
+        if self.x < point.x {
+            XRelation::Left
+        } else if self.x > point.x {
+            XRelation::Right
+        } else {
+            XRelation::On
+        }
+    }
+
+    pub fn compare_y(&self, point: &Point) -> YRelation {
+        if self.y < point.y {
+            YRelation::Above
+        } else if self.y > point.y {
+            YRelation::Below
+        } else {
+            YRelation::On
+        }
+    }
+
+    pub fn compare(&self, point: &Point) -> PointEquality {
+        if self.x == point.x && self.y == point.y {
+            PointEquality::Equal
+        } else {
+            PointEquality::NotEqual
+        }
     }
 }
 
@@ -31,9 +77,9 @@ impl Bound {
     pub fn contains(&self, point: &Point) -> Contains {
         if
             point.x >= self.min.x &&
-            point.x <= self.max.x &&
+            point.x <  self.max.x &&
             point.y >= self.min.y &&
-            point.y <= self.max.y
+            point.y <  self.max.y
         {
             Contains::DoesContain
         } else {

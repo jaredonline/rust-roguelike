@@ -1,17 +1,15 @@
 extern crate rand;
-extern crate tcod;
 
 use self::rand::{Rng, thread_rng};
-use self::tcod::KeyCode;
-use self::tcod::Key::Special;
-
 use std::sync::{Arc, RwLock};
 
-use game::Game;
-use util::{Point, Contains};
+use game::{SafeGameInfo, GameInfo};
+use util::{Point, Contains, XRelation, YRelation, PointEquality};
+use input::{KeyCode};
+use input::Key::SpecialKey;
 
 pub trait MovementComponent {
-    fn update(&self, &Point, Arc<RwLock<Game>>) -> Point;
+    fn update(&self, &Point, Arc<RwLock<GameInfo>>) -> Point;
 }
 
 pub struct UserMovementComponent;
@@ -21,20 +19,20 @@ impl UserMovementComponent {
 }
 
 impl MovementComponent for UserMovementComponent {
-    fn update(&self, start: &Point, game: Arc<RwLock<Game>>) -> Point {
+    fn update(&self, start: &Point, game: Arc<RwLock<GameInfo>>) -> Point {
         let mut offset = Point { x: 0, y: 0 };
         let game = game.read().unwrap();
-        match game.keypress.unwrap().key {
-            Special(KeyCode::Up) => {
+        match game.keypress.key {
+            SpecialKey(KeyCode::Up) => {
                 offset = offset.offset_y(-1);
             },
-            Special(KeyCode::Down) => {
+            SpecialKey(KeyCode::Down) => {
                 offset = offset.offset_y(1);
             },
-            Special(KeyCode::Left) => {
+            SpecialKey(KeyCode::Left) => {
                 offset = offset.offset_x(-1);
             },
-            Special(KeyCode::Right) => {
+            SpecialKey(KeyCode::Right) => {
                 offset = offset.offset_x(1);
             },
             _ => {}
@@ -54,7 +52,7 @@ impl RandomMovementComponent {
 }
 
 impl MovementComponent for RandomMovementComponent {
-    fn update(&self, start: &Point, game: Arc<RwLock<Game>>) -> Point {
+    fn update(&self, start: &Point, game: Arc<RwLock<GameInfo>>) -> Point {
         let mut new_point = Point { x: start.x, y: start.y };
         let game = game.read().unwrap();
         let offset_x = thread_rng().gen_range(0, 3i32) - 1;
@@ -73,3 +71,37 @@ impl MovementComponent for RandomMovementComponent {
     }
 }
 
+pub struct AggroMovementComponent;
+
+impl AggroMovementComponent {
+    pub fn new() -> AggroMovementComponent { AggroMovementComponent }
+}
+
+impl MovementComponent for AggroMovementComponent {
+    fn update(&self, start: &Point, game: SafeGameInfo) -> Point {
+        let game = game.read().unwrap();
+        let mut offset = Point { x: 0, y: 0 };
+        
+        match start.compare_x(&game.char_position) {
+            XRelation::Left  => offset = offset.offset_x(1),
+            XRelation::Right => offset = offset.offset_x(-1),
+            _ => {}
+        }
+
+        match start.compare_y(&game.char_position) {
+            YRelation::Above => offset = offset.offset_y(1),
+            YRelation::Below => offset = offset.offset_y(-1),
+            _ => {}
+        }
+
+        match start.offset(&offset).compare(&game.char_position) {
+            PointEquality::Equal    => { return start.clone(); }
+            PointEquality::NotEqual => {
+                match game.window_bounds.contains(&start.offset(&offset)) {
+                    Contains::DoesContain    => { return start.offset(&offset) }
+                    Contains::DoesNotContain => { return start.clone(); }
+                }
+            }
+        }
+    }
+}
