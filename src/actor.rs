@@ -1,7 +1,7 @@
-use std::sync::{Arc, RwLock, Mutex};
+use std::sync::{Arc, Mutex};
 
 use movement::{MovementComponent, AggroMovementComponent, RandomMovementComponent, UserMovementComponent};
-use game::{GameInfo};
+use game::SafeGameInfo;
 use util::Point;
 
 pub struct Actor {
@@ -32,7 +32,7 @@ impl Actor {
 
     pub fn heroine() -> SafeActor {
         let mc = Box::new(UserMovementComponent::new());
-        Actor::mutex(40, 25, '@', mc)
+        Actor::mutex(40, 25, 1 as char, mc)
     }
 
     pub fn dog() -> SafeActor {
@@ -50,7 +50,7 @@ impl Actor {
         Actor::mutex(20, 20, 'k', mc)
     }
 
-    pub fn update(&mut self, game: Arc<RwLock<GameInfo>>) {
+    pub fn update(&mut self, game: SafeGameInfo) {
         let point = self.movement.update(&self.position, game);
         self.position = point;
     }

@@ -4,9 +4,10 @@ use self::rand::{Rng, thread_rng};
 use std::sync::{Arc, RwLock};
 
 use game::{SafeGameInfo, GameInfo};
+use rendering::{print_action, Window};
 use util::{Point, Contains, XRelation, YRelation, PointEquality};
 use input::{KeyCode};
-use input::Key::SpecialKey;
+use input::Key::{SpecialKey, Printable};
 
 pub trait MovementComponent {
     fn update(&self, &Point, Arc<RwLock<GameInfo>>) -> Point;
@@ -19,28 +20,36 @@ impl UserMovementComponent {
 }
 
 impl MovementComponent for UserMovementComponent {
-    fn update(&self, start: &Point, game: Arc<RwLock<GameInfo>>) -> Point {
+    fn update(&self, start: &Point, game: SafeGameInfo) -> Point {
         let mut offset = Point { x: 0, y: 0 };
         let game = game.read().unwrap();
         match game.keypress.key {
+            Printable('w') |
             SpecialKey(KeyCode::Up) => {
                 offset = offset.offset_y(-1);
             },
+            Printable('s') | 
             SpecialKey(KeyCode::Down) => {
                 offset = offset.offset_y(1);
             },
+            Printable('a') |
             SpecialKey(KeyCode::Left) => {
                 offset = offset.offset_x(-1);
             },
+            Printable('d') |
             SpecialKey(KeyCode::Right) => {
                 offset = offset.offset_x(1);
             },
-            _ => {}
+            _ => {
+            }
         }
 
         match game.window_bounds.contains(&start.offset(&offset)) {
             Contains::DoesContain    => start.offset(&offset),
-            Contains::DoesNotContain => Point { x: start.x, y: start.y }
+            Contains::DoesNotContain => {
+                let _ = game.sender.send(print_action("You can't move that way!", Window::Messages));
+                Point { x: start.x, y: start.y }
+            }
         }
     }
 }

@@ -19,9 +19,10 @@ fn main() {
     let mut game = Game::new();
 
     // game loop!
+    game.render(&pcs, &npcs);
     while !(game.exit()) {
-        game.render(&pcs, &npcs);
         game.wait_for_keypress();
         game.update(&pcs, &npcs);
+        game.render(&pcs, &npcs);
     }
 }

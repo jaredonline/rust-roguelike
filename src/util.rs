@@ -68,12 +68,20 @@ pub enum Contains {
     DoesNotContain
 }
 
+#[derive(Clone)]
 pub struct Bound {
     pub min: Point,
     pub max: Point
 }
 
 impl Bound {
+    pub fn new(min_x: i32, min_y: i32, max_x: i32, max_y: i32) -> Bound {
+        Bound {
+            min: Point { x: min_x, y: min_y },
+            max: Point { x: max_x, y: max_y }
+        }
+    }
+
     pub fn contains(&self, point: &Point) -> Contains {
         if
             point.x >= self.min.x &&
