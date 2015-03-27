@@ -1,5 +1,5 @@
 #![feature(collections)]
-#![feature(core)]
+#![feature(convert)]
 
 pub mod actor;
 pub mod game;
