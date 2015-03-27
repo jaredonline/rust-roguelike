@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter, Result};
+
 #[derive(Clone)]
 pub struct Point {
     pub x: i32,
@@ -72,6 +74,12 @@ pub enum Contains {
 pub struct Bound {
     pub min: Point,
     pub max: Point
+}
+
+impl Display for Bound {
+    fn fmt(&self, fmt: &mut Formatter) -> Result {
+        write!(fmt, "({}, {}, {}, {})", self.min.x, self.min.y, self.max.x, self.max.y)
+    }
 }
 
 impl Bound {

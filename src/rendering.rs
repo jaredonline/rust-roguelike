@@ -38,12 +38,9 @@ pub trait RenderingComponent {
 
     // buffer messages
     fn push_string(&mut self, &str, Window);
-    fn push_message(&mut self, &str);
-    fn push_input(&mut self, &str);
 
     // flush messages
     fn flush_window(&mut self, Window);
-    fn flush_input(&mut self);
 
     // handle channel input
     fn handle_action(&mut self, RenderAction);
@@ -133,24 +130,39 @@ impl TcodRenderingComponent {
             receiver:   r
         }
     }
+
+    fn push_message(&mut self, message: &str) {
+        let mut messages = self.messages.borrow_mut();
+        messages.buffer_message(message);
+    }
+
+    fn push_input(&mut self, message: &str) {
+        let mut input = self.user_input.borrow_mut();
+        input.buffer_message(message);
+    }
+
+    fn flush_input(&mut self) {
+        let mut input = self.user_input.borrow_mut();
+        input.flush_buffer();
+    }
 }
 
 impl RenderingComponent for TcodRenderingComponent {
-fn before_render_new_frame(&mut self) {
-    self.console.clear();
+    fn before_render_new_frame(&mut self) {
+        self.console.clear();
 
-    let mut exit = false;
-    while !exit {
-        match self.receiver.try_recv() {
-            Ok(action) => self.handle_action(action),
-            Err(_)     => exit = true
+        let mut exit = false;
+        while !exit {
+            match self.receiver.try_recv() {
+                Ok(action) => self.handle_action(action),
+                Err(_)     => exit = true
+            }
+        }
+
+        for window in self.get_windows() {
+            self.attach_window(window.clone());
         }
     }
-
-    for window in self.get_windows() {
-        self.attach_window(window.clone());
-    }
-}
 
     fn handle_action(&mut self, action: RenderAction) {
         match action {
@@ -221,18 +233,4 @@ fn before_render_new_frame(&mut self) {
         };
     }
 
-    fn push_message(&mut self, message: &str) {
-        let mut messages = self.messages.borrow_mut();
-        messages.buffer_message(message);
-    }
-
-    fn push_input(&mut self, message: &str) {
-        let mut input = self.user_input.borrow_mut();
-        input.buffer_message(message);
-    }
-
-    fn flush_input(&mut self) {
-        let mut input = self.user_input.borrow_mut();
-        input.flush_buffer();
-    }
 }

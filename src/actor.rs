@@ -3,26 +3,41 @@ use std::sync::{Arc, Mutex};
 use movement::{MovementComponent, AggroMovementComponent, RandomMovementComponent, UserMovementComponent};
 use game::SafeGameInfo;
 use util::Point;
+use std::fmt::{Formatter, Display, Result};
+
+static mut ACTOR_TICKET : i32 = 0;
 
 pub struct Actor {
     pub position:     Point,
     pub display_char: char,
-    pub movement:     Box<MovementComponent + 'static>
+    pub movement:     Box<MovementComponent + 'static>,
+    pub id:           i32
 }
 pub type SafeActor = Arc<Mutex<Actor>>;
 pub type Actors    = Vec<SafeActor>;
 
 unsafe impl Send for Actor {}
 
+impl Display for Actor {
+    fn fmt(&self, fmt: &mut Formatter) -> Result {
+        write!(fmt, "{}", self.id)
+    }
+}
+
 impl Actor {
     pub fn new(x: i32, y: i32, c: char, mc: Box<MovementComponent>) -> Actor {
+        let ticket = unsafe {
+            ACTOR_TICKET += 1;
+            ACTOR_TICKET
+        };
         Actor {
             position: Point {
                 x: x,
                 y: y
             },
             display_char: c,
-            movement: mc
+            movement: mc,
+            id: ticket
         }
     }
 

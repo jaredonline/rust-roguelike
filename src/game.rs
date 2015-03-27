@@ -4,10 +4,11 @@ use std::sync::mpsc::Sender;
 
 use util::{Bound, Point};
 use rendering::{RenderingComponent, TcodRenderingComponent, RenderAction};
-use actor::{Actors,};
+use actor::{Actors, Actor};
 use input::{KeyboardInput, KeyCode};
 use input::Key::{SpecialKey, Printable};
 use game_state::{GameState, MovementGameState, AttackInputGameState};
+use map::{Maps, MapType};
 
 pub struct GameInfo {
     pub window_bounds: Bound,
@@ -15,7 +16,8 @@ pub struct GameInfo {
     pub exit:          bool,
     pub char_position: Point,
     pub shift:         bool,
-    pub sender:        Sender<RenderAction>
+    pub sender:        Sender<RenderAction>,
+    pub map:           Maps
 }
 
 unsafe impl Send for GameInfo {}
@@ -39,8 +41,26 @@ impl Game {
 
         let (s, r) = mpsc::channel();
 
-        let renderer      = Box::new(TcodRenderingComponent::new(&window_bounds, &map_bounds, &stats_bounds, &mes_bounds, &ui_bounds, r));
-        let input         = KeyboardInput { key: SpecialKey(KeyCode::None), shift: false };
+        let renderer = Box::new(TcodRenderingComponent::new(&window_bounds, &map_bounds, &stats_bounds, &mes_bounds, &ui_bounds, r));
+        let input    = KeyboardInput { key: SpecialKey(KeyCode::None), shift: false };
+
+        let mut map = Maps::new(&map_bounds);
+        let pcs = vec![
+            Actor::heroine()
+        ];
+
+        let npcs = vec![
+            Actor::kobold()
+        ];
+
+        let friends = vec![
+            Actor::dog(),
+            Actor::cat(),
+        ];
+
+        map.push_actors(npcs, MapType::Enemies);
+        map.push_actors(pcs, MapType::Pcs);
+        map.push_actors(friends, MapType::Friends);
 
         let gi = Arc::new(RwLock::new(GameInfo {
             window_bounds: map_bounds,
@@ -48,7 +68,8 @@ impl Game {
             exit:          false,
             char_position: Point { x: 0, y: 0 },
             shift:         false,
-            sender:        s
+            sender:        s,
+            map:           map
         }));
 
         let state = Box::new(MovementGameState::new());
@@ -64,10 +85,20 @@ impl Game {
         self.renderer.closed() || self.game_info.read().unwrap().exit
     }
 
-    pub fn render(&mut self, pcs: &Actors, actors: &Actors) {
+    pub fn render(&mut self) {
+        let (enemies, pcs, terrain, friends) = {
+            let game_info = self.game_info.read().unwrap();
+            let e = game_info.map.pull_actors(MapType::Enemies);
+            let p = game_info.map.pull_actors(MapType::Pcs);
+            let t = game_info.map.pull_actors(MapType::Terrain);
+            let f = game_info.map.pull_actors(MapType::Friends);
+            (e, p, t, f)
+        };
         self.renderer.before_render_new_frame();
-        self.render_actors(actors);
-        self.render_actors(pcs);
+        self.render_actors(&enemies);
+        self.render_actors(&friends);
+        self.render_actors(&pcs);
+        self.render_actors(&terrain);
         self.renderer.after_render_new_frame();
     }
 
@@ -78,7 +109,7 @@ impl Game {
         }
     }
 
-    pub fn update(&mut self, pcs: &Actors, actors: &Actors) {
+    pub fn update(&mut self) {
         let shift = { self.game_info.read().unwrap().shift };
         if !shift {
             if self.state.should_exit() {
@@ -87,7 +118,7 @@ impl Game {
                 self.state.enter(self.game_info.clone());
             }
 
-            self.state.update(pcs, actors, self.game_info.clone());
+            self.state.update(self.game_info.clone());
         }
     }
 
