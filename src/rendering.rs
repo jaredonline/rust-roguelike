@@ -154,7 +154,7 @@ fn before_render_new_frame(&mut self) {
 
     fn handle_action(&mut self, action: RenderAction) {
         match action {
-            RenderAction::Print(string, window) => self.push_string(string.as_slice(), window),
+            RenderAction::Print(string, window) => self.push_string(string.as_ref(), window),
             RenderAction::Flush(window)         => self.flush_window(window)
         }
     }
