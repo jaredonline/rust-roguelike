@@ -3,12 +3,13 @@ use std::cmp::{min, max};
 
 use std::fmt::{Display, Formatter, Result};
 
-use tcod::{Console, RootConsole, BackgroundFlag};
+use tcod::{Console, RootConsole, BackgroundFlag, Map as FovMap};
 use tcod::console::Offscreen;
 use tcod::colors::{self, Color};
 use tcod::input::Key;
 use tcod::input::KeyCode::{Up, Down, Left, Right, Escape};
 use tcod::random::Rng;
+use tcod::map::FovAlgorithm;
 
 const SCREEN_WIDTH: i32 = 80;
 const SCREEN_HEIGHT: i32 = 50;
@@ -20,15 +21,28 @@ const COLOR_DARK_WALL: Color = Color {
     g: 0,
     b: 100,
 };
+const COLOR_LIGHT_WALL: Color = Color {
+    r: 130,
+    g: 110,
+    b: 50,
+};
 const COLOR_DARK_GROUND: Color = Color {
     r: 50,
     g: 50,
     b: 150,
 };
+const COLOR_LIGHT_GROUND: Color = Color {
+    r: 200,
+    g: 180,
+    b: 50,
+};
 
 const ROOM_MAX_SIZE: i32 = 10;
 const ROOM_MIN_SIZE: i32 = 6;
 const MAX_ROOMS: i32 = 30;
+
+const FOV_LIGHT_WALLS: bool = true;
+const TORCH_RADIUS: i32 = 10;
 
 type Map = Vec<Vec<Tile>>;
 
@@ -95,9 +109,11 @@ impl Object {
         }
     }
 
-    fn draw(&self, con: &mut Console) {
-        con.set_default_foreground(self.color);
-        con.put_char(self.x, self.y, self.char, BackgroundFlag::None);
+    fn draw(&self, con: &mut Console, fov_map: &FovMap) {
+        if fov_map.is_in_fov(self.x, self.y) {
+            con.set_default_foreground(self.color);
+            con.put_char(self.x, self.y, self.char, BackgroundFlag::None);
+        }
     }
 
     fn clear(&self, con: &mut Console) {
@@ -109,6 +125,7 @@ impl Object {
 struct Tile {
     blocked: bool,
     block_site: bool,
+    explored: bool,
 }
 
 impl Tile {
@@ -116,6 +133,7 @@ impl Tile {
         Tile {
             blocked: blocked,
             block_site: block_site,
+            explored: false,
         }
     }
 }
@@ -134,36 +152,79 @@ fn main() {
                           '@',
                           colors::YELLOW);
 
-    let map = make_map(&mut player);
+    let mut map = make_map(&mut player);
     let mut objects = [player, npc];
 
+    let mut fov_map = FovMap::new(MAP_WIDTH as i32, MAP_HEIGHT as i32);
+    for x in 0..MAP_WIDTH {
+        for y in 0..MAP_HEIGHT {
+            fov_map.set(x as i32,
+                        y as i32,
+                        !map[x][y].block_site,
+                        !map[x][y].blocked)
+        }
+    }
+
+    {
+        let player = &objects[0];
+        fov_map.compute_fov(player.x,
+                            player.y,
+                            TORCH_RADIUS,
+                            FOV_LIGHT_WALLS,
+                            FovAlgorithm::Basic);
+    }
 
     let mut exit = false;
     while !(root.window_closed() || exit) {
-        render_all(&objects, &mut root, &mut con, &map);
+        render_all(&objects, &mut root, &mut con, &mut map, &fov_map);
         root.flush();
 
         for object in &objects {
             object.clear(&mut con);
         }
-        exit = handle_keys(&mut root, &mut objects[0], &map);
+        exit = handle_keys(&mut root, &mut objects[0], &map, &mut fov_map);
     }
 }
 
-fn handle_keys(console: &mut RootConsole, player: &mut Object, map: &Map) -> bool {
+fn handle_keys(console: &mut RootConsole,
+               player: &mut Object,
+               map: &Map,
+               fov_map: &mut FovMap)
+               -> bool {
     let keypress = console.wait_for_keypress(true);
     let mut ret = false;
+    let mut fov_recompute = false;
 
     match keypress {
-        Key { code: Up, .. } => player.move_by(0, -1, map),
-        Key { code: Down, .. } => player.move_by(0, 1, map),
-        Key { code: Left, .. } => player.move_by(-1, 0, map),
-        Key { code: Right, .. } => player.move_by(1, 0, map),
+        Key { code: Up, .. } => {
+            player.move_by(0, -1, map);
+            fov_recompute = true;
+        }
+        Key { code: Down, .. } => {
+            player.move_by(0, 1, map);
+            fov_recompute = true;
+        }
+        Key { code: Left, .. } => {
+            player.move_by(-1, 0, map);
+            fov_recompute = true;
+        }
+        Key { code: Right, .. } => {
+            player.move_by(1, 0, map);
+            fov_recompute = true;
+        }
         Key { code: Escape, .. } => {
             ret = true;
         }
         _ => {}
     };
+
+    if fov_recompute {
+        fov_map.compute_fov(player.x,
+                            player.y,
+                            TORCH_RADIUS,
+                            FOV_LIGHT_WALLS,
+                            FovAlgorithm::Basic);
+    }
 
     return ret;
 }
@@ -223,20 +284,36 @@ fn make_map(player: &mut Object) -> Map {
     map
 }
 
-fn render_all(objects: &[Object], root: &mut RootConsole, con: &mut Offscreen, map: &Map) {
+fn render_all(objects: &[Object],
+              root: &mut RootConsole,
+              con: &mut Offscreen,
+              map: &mut Map,
+              fov_map: &FovMap) {
     for object in objects {
-        object.draw(con);
+        object.draw(con, fov_map);
     }
 
     for x in 0..MAP_WIDTH {
         for y in 0..MAP_HEIGHT {
             let wall = map[x][y].block_site;
             let (x, y) = (x as i32, y as i32);
+            let visible = fov_map.is_in_fov(x, y);
 
-            if wall {
-                con.set_char_background(x, y, COLOR_DARK_WALL, BackgroundFlag::Set);
+            if visible {
+                if wall {
+                    con.set_char_background(x, y, COLOR_LIGHT_WALL, BackgroundFlag::Set);
+                } else {
+                    con.set_char_background(x, y, COLOR_LIGHT_GROUND, BackgroundFlag::Set);
+                }
+                map[x as usize][y as usize].explored = true;
             } else {
-                con.set_char_background(x, y, COLOR_DARK_GROUND, BackgroundFlag::Set);
+                if map[x as usize][y as usize].explored {
+                    if wall {
+                        con.set_char_background(x, y, COLOR_DARK_WALL, BackgroundFlag::Set);
+                    } else {
+                        con.set_char_background(x, y, COLOR_DARK_GROUND, BackgroundFlag::Set);
+                    }
+                }
             }
         }
     }
