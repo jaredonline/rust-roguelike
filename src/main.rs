@@ -1,17 +1,23 @@
 extern crate tcod;
-use tcod::Key::Special;
-use tcod::{Console, BackgroundFlag, KeyCode};
+use tcod::input::Key;
+use tcod::input::KeyCode::{Escape};
+use tcod::console::{Console, BackgroundFlag, Root, FontLayout, FontType, Renderer};
 
 fn main() {
-    let mut con = Console::init_root(80, 50, "libtcod Rust tutorial", false);
+    let mut con = Root::initializer()
+        .size(80, 50)
+        .title("libtcod Rust tutorial")
+        .renderer(Renderer::OpenGL)
+        .init();
+
     let mut exit = false;
-    while !(Console::window_closed() || exit) {
+    while !(con.window_closed() || exit) {
         con.clear();
         con.put_char(40, 25, '@', BackgroundFlag::Set);
-        Console::flush();
-        let keypress = Console::wait_for_keypress(true);
-        match keypress.key {
-            Special(KeyCode::Escape) => exit = true,
+        con.flush();
+        let keypress = con.wait_for_keypress(true);
+        match keypress {
+            Key { code: Escape, .. } => exit = true,
             _ => {}
         }
     }

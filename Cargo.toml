@@ -4,6 +4,6 @@ name = "dwemthys"
 version = "0.0.1"
 authors = ["jmcfarland"]
 
-[dependencies.tcod]
+[dependencies]
 
-git = "https://github.com/tomassedovic/tcod-rs.git"
+tcod = "0.10"
